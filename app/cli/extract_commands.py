@@ -1,6 +1,7 @@
 import typer
 
 from app.infra.di import Container
+from app.repositories.json_repository import JsonRepository
 
 app = typer.Typer()
 
@@ -17,9 +18,9 @@ def params(
     container.config.SOURCE_PATH.from_value(source_path)
     container.config.TARGET_PATH.from_value(target_path)
 
-    controller = container.data_controller()
-    use_case = container.preprocess_data_use_case()
-    controller.run(use_case)
+    extract_params_use_case = container.extract_params_use_case()
+    extract_controller = container.extract_controller()
+    extract_controller.run(extract_params_use_case)
 
 @app.command()
 def param_duplicates(
@@ -34,9 +35,9 @@ def param_duplicates(
     container.config.SOURCE_PATH.from_value(source_path)
     container.config.TARGET_PATH.from_value(target_path)
 
-    controller = container.data_controller()
-    use_case = container.preprocess_data_use_case()
-    controller.run(use_case)
+    extract_param_duplicates_use_case = container.extract_param_duplicates_use_case()
+    extract_controller = container.extract_controller()
+    extract_controller.run(extract_param_duplicates_use_case)
 
 @app.command()
 def data(
@@ -59,6 +60,13 @@ def data(
     container.config.PARAMS_PATH.from_value(params_path)
     container.config.DATA_KEY.from_value(data_key)
 
-    controller = container.data_controller()
-    use_case = container.preprocess_data_use_case()
-    controller.run(use_case)
+
+    extract_data_use_case = container.extract_data_use_case()
+    param_repo = JsonRepository(
+        source_path=params_path, target_path=params_path
+    )
+
+    extract_controller = container.extract_controller()
+    extract_controller.extract_data(
+        extract_data_use_case, param_repo
+    )
