@@ -1,3 +1,5 @@
+from typing import List
+
 import typer
 
 from app.core.use_cases.combine_deltas import CombineDeltasUseCase
@@ -45,9 +47,9 @@ def compute_deltas(
     container.config.SOURCE_PATH.from_value(source_path)
     container.config.TARGET_PATH.from_value(target_path)
 
-    compute_preprocess_data_use_case = container.compute_preprocess_data_use_case()
+    compute_deltas_use_case = container.compute_deltas_use_case()
     data_controller = container.data_controller()
-    data_controller.run(compute_preprocess_data_use_case)
+    data_controller.run(compute_deltas_use_case)
 
 @app.command()
 def combine_deltas(
@@ -61,7 +63,6 @@ def combine_deltas(
             "", help=""
         )
 ):
-
     delta1_repo = DataRepository(source_path=delta1_path)
     delta2_repo = DataRepository(source_path=delta2_path)
 
@@ -70,3 +71,53 @@ def combine_deltas(
 
     combined_repo = DataRepository(target_path=target_path)
     combined_repo.save(data)
+
+@app.command()
+def enrich_delta(
+        source_path: str = typer.Option(
+            "combined_delta.json", help=""
+        ),
+        meta_path: str = typer.Option(
+            "personal_data.json", help=""
+        ),
+        target_path: str = typer.Option(
+            "delta.json", help=""
+        )
+):
+    container = Container()
+    container.config.SOURCE_PATH.from_value(source_path)
+    container.config.META_SOURCE_PATH.from_value(meta_path)
+    container.config.TARGET_PATH.from_value(target_path)
+
+    enrich_delta_use_case = container.enrich_delta_use_case()
+    data_controller = container.data_controller()
+    data_controller.run(enrich_delta_use_case)
+
+@app.command()
+def delta_feature_inspect(
+        source_path: str = typer.Option(
+            "delta.json", help=""
+        ),
+        noizy_feature_path: str = typer.Option(
+            "noizy_features.json", help=""
+        ),
+        target_path: str = typer.Option(
+            "clean_delta.json", help=""
+        ),
+        include_patterns: List[str] = typer.Option(
+            ["*_norm"], help=""
+        ),
+        exclude_fields: List[str] = typer.Option(
+            [""], help=""
+        )
+):
+    container = Container()
+    container.config.SOURCE_PATH.from_value(source_path)
+    container.config.NOIZY_FEATURE_PATH.from_value(noizy_feature_path)
+    container.config.TARGET_PATH.from_value(target_path)
+    container.config.INCLUDE_PATTERS.from_value(include_patterns)
+    container.config.EXCLUDE_FIELDS.from_value(exclude_fields)
+
+    feature_inspect_use_case = container.feature_inspect_use_case()
+    data_controller = container.data_controller()
+    data_controller.run(feature_inspect_use_case)

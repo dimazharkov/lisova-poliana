@@ -13,10 +13,12 @@ class ExtractController:
         json_data = self.repo.all()
         data = use_case.run(json_data)
         self.repo.save(data)
+        print('done!')
 
     def extract_data(self, use_case: ExtractDataUseCaseContract, params_repo: JsonRepository):
         json_data = self.repo.all()
         param_aliases = [f"h{i + 1}" for i in range(len(params_repo.all()))]
         data = use_case.run(json_data, param_aliases=param_aliases)
         self.repo.save(data)
+        print('done!')
 

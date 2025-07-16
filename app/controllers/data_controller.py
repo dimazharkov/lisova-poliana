@@ -10,5 +10,6 @@ class DataController:
         data = self.repo.all()
         data = use_case.run(data)
         self.repo.save(data)
+        print("done!")
 
 

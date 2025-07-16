@@ -8,6 +8,12 @@ class ComputeDeltasUseCase(UseCaseContract):
     def run(self, data: pd.DataFrame) -> pd.DataFrame:
         data = data.copy()
 
+        # гигиена: удаляем колонки, которые не нужны для расчета дельт
+        data = data.drop(columns=[
+            col for col in data.columns
+            if col.endswith("_norm") or col == "median_effect"
+        ])
+
         group_fields = ["person", "sex", "dob", "age", "category", "experiment"]
         param_cols = [col for col in data.columns if col.startswith("h")]
 
@@ -20,8 +26,8 @@ class ComputeDeltasUseCase(UseCaseContract):
             row1, row2 = group_sorted.iloc[0], group_sorted.iloc[1]
 
             result = {key: row1[key] for key in group_fields}
-            result["date_before"] = row1["experiment_date"].date()
-            result["date_after"] = row2["experiment_date"].date()
+            result["date_before"] = row1["experiment_date"]
+            result["date_after"] = row2["experiment_date"]
 
             abs_deltas = {}
             log_deltas = {}
@@ -34,23 +40,23 @@ class ComputeDeltasUseCase(UseCaseContract):
                 abs_col = f"{col}_abs"
                 abs_deltas[abs_col] = val2 - val1 if pd.notnull(val1) and pd.notnull(val2) else None
 
-                log_col = f"{col}_log"
+                log_col = f"{col}_norm"
                 if pd.notnull(val1) and pd.notnull(val2):
                     epsilon = 1e-8
                     log_val = np.log1p(np.abs((val2 - val1) / (val1 + epsilon)))
                     log_deltas[log_col] = log_val
-                    log_values_for_median.append(log_val)
+                    # log_values_for_median.append(log_val)
                 else:
                     log_deltas[log_col] = None
-                    log_values_for_median.append(np.nan)
+                    # log_values_for_median.append(np.nan)
 
             result.update(abs_deltas)
             result.update(log_deltas)
 
-            if np.any(~np.isnan(log_values_for_median)):
-                result["effect_median"] = np.nanmedian(log_values_for_median)
-            else:
-                result["effect_median"] = np.nan
+            # if np.any(~np.isnan(log_values_for_median)):
+            #     result["effect_median"] = np.nanmedian(log_values_for_median)
+            # else:
+            #     result["effect_median"] = np.nan
 
             return pd.Series(result)
 

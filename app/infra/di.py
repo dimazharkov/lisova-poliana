@@ -5,10 +5,12 @@ from app.controllers.extract_controller import ExtractController
 from app.core.use_cases.clear_data import ClearDataUseCase
 from app.core.use_cases.compute_deltas import ComputeDeltasUseCase
 from app.core.use_cases.enrich_data import EnrichDataUseCase
+from app.core.use_cases.enrich_delta import EnrichDeltaUseCase
 from app.core.use_cases.extract_data import ExtractDataUseCase
 from app.core.use_cases.extract_param_duplicates import ExtractParamDuplicatesUseCase
 from app.core.use_cases.extract_params import ExtractParamsUseCase
 from app.core.use_cases.extract_personal_data import ExtractPersonalDataUseCase
+from app.core.use_cases.feature_inspect import FeatureInspectUseCase
 from app.core.use_cases.normalize_data import NormalizeDataUseCase
 from app.core.use_cases.preprocess_data import PreprocessDataUseCase
 from app.repositories.data_repository import DataRepository
@@ -79,4 +81,26 @@ class Container(containers.DeclarativeContainer):
     extract_data_use_case = providers.Factory(
         ExtractDataUseCase,
         data_key=config.DATA_KEY
+    )
+
+    meta_repository = providers.Factory(
+        DataRepository,
+        source_path=config.META_SOURCE_PATH,
+    )
+
+    enrich_delta_use_case = providers.Factory(
+        EnrichDeltaUseCase,
+        metadata_repository=meta_repository
+    )
+
+    noizy_feature_repository = providers.Factory(
+        JsonRepository,
+        target_path=config.NOIZY_FEATURE_PATH,
+    )
+
+    feature_inspect_use_case = providers.Factory(
+        FeatureInspectUseCase,
+        repository=noizy_feature_repository,
+        include_patterns=config.INCLUDE_PATTERS,
+        exclude_fields=config.EXCLUDE_FIELDS
     )

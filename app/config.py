@@ -25,7 +25,6 @@ class Config(NamedTuple):
 @lru_cache()
 def get_config() -> Config:
     root = Path(__file__).resolve().parent.parent
-
     return Config(
         env=os.getenv("ENV", "dev"),
         project_title=" PhD Research Project by Dima Zharkov",
