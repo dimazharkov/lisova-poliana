@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 import pandas as pd
+from matplotlib.figure import Figure
 
 from app.config import config
 
@@ -21,13 +22,13 @@ def save_to_disc(
             json.dump(data, f, ensure_ascii=False, indent=indent)
 
 
-def save_plot_to_disc(plt, file_path: str | Path, dpi: int = 300) -> None:
+def save_plot_to_disc(fig: Figure, file_path: str | Path, dpi: int = 300) -> None:
     relative_path = Path(file_path.lstrip("/"))
     full_file_path = config.static_path / relative_path
 
     full_file_path.parent.mkdir(parents=True, exist_ok=True)
 
-    plt.savefig(full_file_path, dpi=dpi)
+    fig.savefig(full_file_path, dpi=dpi)
 
 
 def load_from_disc(file_path: str | Path) -> dict:

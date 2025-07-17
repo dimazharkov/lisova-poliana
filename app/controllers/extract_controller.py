@@ -1,7 +1,5 @@
 from app.core.contracts.extract_data_use_case_contract import ExtractDataUseCaseContract
 from app.core.contracts.extract_use_case_contract import ExtractUseCaseContract
-from app.core.contracts.use_case_contract import UseCaseContract
-from app.repositories.data_repository import DataRepository
 from app.repositories.json_repository import JsonRepository
 
 
