@@ -12,6 +12,7 @@ class DataRepository(RepositoryContract):
         self.target_path = target_path
 
     def _load_from_path(self, source_path: Optional[str]) -> Optional[pd.DataFrame]:
+        print(f"Loading data from {source_path}")
         return load_df_from_disc(source_path) if source_path else None
 
     def all(self) -> pd.DataFrame:

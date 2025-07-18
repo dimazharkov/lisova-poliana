@@ -1,3 +1,5 @@
+from dataclasses import asdict
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -23,7 +25,9 @@ class BaselineControlExperimentUseCase(ExperimentUseCaseContract):
             g0 = group[group["treatment"] == 0]["median_effect"]
             g1 = group[group["treatment"] == 1]["median_effect"]
 
-            results[f"baseline_experiment_{exp_id}"] = self.stat_evaluator.evaluate(g0, g1)
+            stat_result = self.stat_evaluator.evaluate(g0, g1)
+            results[f"baseline_experiment_{exp_id}"] = asdict(stat_result)
+
             plots_data.append(group)
 
         combined_plot_df = pd.concat(plots_data)
@@ -42,8 +46,8 @@ class BaselineControlExperimentUseCase(ExperimentUseCaseContract):
         plt.ylabel("Медіанний эфект")
         plt.legend(title="Експерименти")
         legend = plt.legend()
-        legend.get_texts()[0].set_text("3 хв.")
-        legend.get_texts()[1].set_text("5 хв.")
+        legend.get_texts()[0].set_text("Контроль")
+        legend.get_texts()[1].set_text("Дих")
         plt.tight_layout()
 
         plots["baseline_experiment"] = plt.gcf()

@@ -19,6 +19,6 @@ class PreprocessDataUseCase(UseCaseContract):
 
     def run(self, data: pd.DataFrame) -> pd.DataFrame:
         data = self.clear_data_use_case.run(data)
-        data = self.enrich_data_use_case.run(data)
         data = self.normalize_data_use_case.run(data)
+        data = self.enrich_data_use_case.run(data)
         return data

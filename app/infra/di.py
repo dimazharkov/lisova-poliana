@@ -50,8 +50,14 @@ class Container(containers.DeclarativeContainer):
         ClearDataUseCase
     )
 
-    enrich_data_use_case = providers.Singleton(
+    meta_repository = providers.Factory(
+        DataRepository,
+        source_path=config.META_SOURCE_PATH,
+    )
+
+    enrich_data_use_case = providers.Factory(
         EnrichDataUseCase,
+        metadata_repository=meta_repository,
         treatment=config.TREATMENT
     )
 
@@ -85,11 +91,6 @@ class Container(containers.DeclarativeContainer):
     extract_data_use_case = providers.Factory(
         ExtractDataUseCase,
         data_key=config.DATA_KEY
-    )
-
-    meta_repository = providers.Factory(
-        DataRepository,
-        source_path=config.META_SOURCE_PATH,
     )
 
     enrich_delta_use_case = providers.Factory(

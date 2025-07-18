@@ -1,12 +1,9 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Union
 
 
 @dataclass
 class StatConclusion:
-    value: Optional[float]
-    meaning: str
-    p_value: Optional[float]
-    u_value: Optional[float]
-    rank_biserial_r: Optional[float]
-    interpretation: str
+    score: Optional[float] = None
+    meaning: Optional[str] = "not enough data"
+    interpretation: Optional[str] = "not enough data"

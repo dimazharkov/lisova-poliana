@@ -9,7 +9,7 @@ app = typer.Typer()
 @app.command()
 def baseline(
         source_paths: List[str] = typer.Option(
-            "control_data.json treatment_data.json", help=""
+            ["control_data.json", "treatment_data.json"], help=""
         ),
         target_folder: str = typer.Option(
             "baseline", help=""

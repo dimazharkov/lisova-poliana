@@ -17,6 +17,9 @@ def prep(
         source_path: str = typer.Option(
             "", help=""
         ),
+        meta_path: str = typer.Option(
+            "", help=""
+        ),
         target_path: str = typer.Option(
             "", help=""
         ),
@@ -27,6 +30,7 @@ def prep(
 ):
     container = Container()
     container.config.SOURCE_PATH.from_value(source_path)
+    container.config.META_SOURCE_PATH.from_value(meta_path)
     container.config.TARGET_PATH.from_value(target_path)
     container.config.TREATMENT.from_value(treatment)
 
