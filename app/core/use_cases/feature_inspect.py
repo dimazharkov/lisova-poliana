@@ -4,32 +4,21 @@ from typing import List
 
 import pandas as pd
 
+from app.core.contracts.column_filter_contract import ColumnFilterContract
 from app.core.contracts.repository_contract import RepositoryContract
 from app.core.contracts.use_case_contract import UseCaseContract
 from app.core.utils.stat_utils import column_statistics, clean_outliers
 
 
 class FeatureInspectUseCase(UseCaseContract):
-    def __init__(
-            self,
-            repository: RepositoryContract,
-            include_patterns: List[str] = None,
-            exclude_fields: List[str] = None
-    ) -> None:
-        """
-        :param include_patterns: список паттернов (масок) колонок, которые нужно анализировать.
-               Примеры: ["h*", "vital_*", "bp_*"]
-        :param exclude_fields: список точных названий колонок, которые нужно исключить из анализа.
-               Примеры: ["h1_norm", "median_effect"]
-        """
-        super().__init__()
+    def __init__(self, repository: RepositoryContract, column_filter: ColumnFilterContract) -> None:
         self.repository = repository
-        self.include_patterns = include_patterns
-        self.exclude_fields = exclude_fields
+        self.column_filter = column_filter
 
     def run(self, data: pd.DataFrame) -> pd.DataFrame:
         data = data.copy()
-        target_columns = self._filter_columns(data)
+
+        target_columns = self.column_filter.filter(list(data.columns))
 
         noizy_columns = []
         noizy_stat = {}
@@ -46,22 +35,3 @@ class FeatureInspectUseCase(UseCaseContract):
         data = data.drop(columns=noizy_columns)
 
         return data
-
-    def _filter_columns(self, df: pd.DataFrame) -> List[str]:
-        all_columns = list(df.columns)
-
-        # Если маски не заданы — берём все колонки
-        if not self.include_patterns:
-            matched = set(all_columns)
-        else:
-            matched = set()
-            for pattern in self.include_patterns:
-                matched.update(fnmatch.filter(all_columns, pattern))
-
-        # Если исключения заданы — исключаем
-        if self.exclude_fields:
-            matched = [col for col in matched if col not in self.exclude_fields]
-        else:
-            matched = list(matched)
-
-        return matched

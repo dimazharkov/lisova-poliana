@@ -42,13 +42,13 @@ def param_duplicates(
 @app.command()
 def data(
         source_path: str = typer.Option(
-            "raw_data.json", help=""
+            "source/raw_data.json", help=""
         ),
         target_path: str = typer.Option(
             "", help="Результат в: control_data.json или treatment_data.json"
         ),
         params_path: str = typer.Option(
-            "params.json", help=""
+            "source/params.json", help=""
         ),
         data_key: str = typer.Option(
             "", help="Вкладки: 'контроль' или 'Дих'"

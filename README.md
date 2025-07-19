@@ -2,25 +2,38 @@
 Data Analysis for the Lisova Poliana center
 
 Подготовка.
-1. Экстракция данных:
-- python main.py extract params
+1. Подготовка источников:
+- python main.py extract params --source-path=source/raw_data.json --target-path=source/params.json
 - вручную добавить параметрам в группах (много повторяющиеся) названия групп: "Амплітуда P (мкВ)" -> "Амплітуда P (мкВ) — відведення I"
-- python main.py extract param-duplicates
-- python main.py extract data --target-path=control_data.json --data-key=контроль
-- python main.py extract data --target-path=treatment_data.json --data-key=Дих
-- python main.py extract personal-data --source_path=raw_data.json --target-path=personal_data.json
-
-2. Подготовка данных:
-- python main.py data prep --source-path=control_data.json --meta-path=personal_data.json --target-path=control_data.json --treatment=0
-- python main.py data prep --source-path=treatment_data.json --meta-path=personal_data.json --target-path=treatment_data.json --treatment=1
-- python main.py data compute-deltas --source-path=control_data.json --target-path=control_delta.json
-- python main.py data compute-deltas --source-path=treatment_data.json --target-path=treatment_delta.json
-- python main.py data combine-deltas --delta1-path=control_delta.json --delta2-path=treatment_delta.json --target-path=combined_delta.json
-- python main.py data delta-feature-inspect --source-path=combined_delta.json --noizy-feature-path=noizy_features.json --target-path=clean_delta.json
-- python main.py data enrich-delta --source-path=clean_delta.json --meta-path=personal_data.json --target-path=delta.json
-
-3. Эксперименты
-- python main.py experiment baseline --source-paths control_data.json --source-paths treatment_data.json --target-folder=baseline
+- python main.py extract param-duplicates --source-path=source/params.json --target-path=source/param_duplicates.json
+- python main.py extract personal-data --source-path=source/raw_data.json --target-path=source/personal_data.json
+---
+2. Подготовка контрольных данных:
+- python main.py extract data --source-path=source/raw_data.json --target-path=control_data.json --data-key=контроль
+- python main.py data prep --source-path=control_data.json --target-path=control_data.json --treatment=0
+- python main.py data inspect --source-path=control_data.json --target-path=control_data.json --noizy-feature-path=control_noizy.json
+- python main.py data normalize --source-path=control_data.json --target-path=control_norm.json
+- python main.py data aggregate --source-path=control_norm.json --target-path=control_norm.json
+- python main.py data personalize --source-path=control_norm.json --target-path=control_norm.json --meta-path=source/personal_data.json
+--- 
+3. Подготовка данных терапии:
+- python main.py extract data --source-path=source/raw_data.json --target-path=treatment_data.json --data-key=Дих
+- python main.py data prep --source-path=treatment_data.json --target-path=treatment_data.json --treatment=1
+- python main.py data inspect --source-path=treatment_data.json --target-path=treatment_data.json --noizy-feature-path=treatment_noizy.json
+- python main.py data normalize --source-path=treatment_data.json --target-path=treatment_norm.json
+- python main.py data aggregate --source-path=treatment_norm.json --target-path=treatment_norm.json
+- python main.py data personalize --source-path=treatment_norm.json --target-path=treatment_norm.json --meta-path=source/personal_data.json
+---
+4. Подготовка дельт:
+- python main.py delta build --source-path=control_data.json --target-path=control_delta.json
+- python main.py delta build --source-path=treatment_data.json --target-path=treatment_delta.json
+- python main.py delta combine --source-path=control_delta.json --source-path=treatment_delta.json --target-path=delta.json
+- python main.py data inspect --source-path=delta.json --target-path=delta.json --noizy-feature-path=delta_noizy.json
+- python main.py data normalize --source-path=delta.json --target-path=delta_norm.json
+- python main.py data personalize --source-path=delta_norm.json --target-path=delta_norm.json --meta-path=source/personal_data.json
+---
+5. Эксперименты
+- python main.py experiment baseline --source-path control_norm.json --source-path treatment_norm.json --target-folder=baseline
 
 
 Все пациенты: мужчины и женщины

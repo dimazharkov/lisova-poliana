@@ -1,9 +1,9 @@
+from app.core.contracts.repository_contract import RepositoryContract
 from app.core.contracts.use_case_contract import UseCaseContract
-from app.repositories.data_repository import DataRepository
 
 
 class DataController:
-    def __init__(self, repo: DataRepository):
+    def __init__(self, repo: RepositoryContract):
         self.repo = repo
 
     def run(self, use_case: UseCaseContract):
