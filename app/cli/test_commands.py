@@ -3,7 +3,7 @@ import json
 import pandas as pd
 import typer
 
-from app.core.use_cases.experiments.baseline_control_experiment import BaselineControlExperimentUseCase
+from app.core.use_cases.experiments.baseline_control import BaselineControlExperimentUseCase
 from app.infra.evaluators.stat_evaluator import StatEvaluator
 from app.utils.os_utils import load_df_from_disc
 
