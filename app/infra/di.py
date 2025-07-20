@@ -11,6 +11,7 @@ from app.core.use_cases.build_delta import BuildDeltaUseCase
 from app.core.use_cases.add_treatment_data import SetupRepeatAndTreatmentUseCase
 from app.core.use_cases.combine_deltas import CombineDeltasUseCase
 from app.core.use_cases.experiments.baseline_control import BaselineControlExperimentUseCase
+from app.core.use_cases.experiments.before_after import BeforeAfterExperimentUseCase
 from app.core.use_cases.extract_data import ExtractDataUseCase
 from app.core.use_cases.extract_param_duplicates import ExtractParamDuplicatesUseCase
 from app.core.use_cases.extract_params import ExtractParamsUseCase
@@ -19,6 +20,7 @@ from app.core.use_cases.feature_inspect import FeatureInspectUseCase
 from app.core.use_cases.normalize_data import NormalizeDataUseCase
 from app.core.use_cases.preprocess_data import PreprocessDataUseCase
 from app.infra.evaluators.stat_evaluator import StatEvaluator
+from app.infra.providers.config_provider import ConfigProvider
 from app.infra.filters.column_filter import ColumnFilter
 from app.infra.filters.data_filter import DataFilter
 from app.repositories.data_repository import DataRepository
@@ -137,6 +139,17 @@ class Container(containers.DeclarativeContainer):
         column_filter=column_filter
     )
 
+    person_repository = providers.Factory(
+        PersonRepository,
+        source_path=config.META_SOURCE_PATH,
+    )
+
+    add_personal_data_use_case = providers.Factory(
+        AddPersonalDataUseCase,
+        repository=person_repository,
+        anchor_col=config.ANCHOR_COL
+    )
+
     data_filter = providers.Factory(
         DataFilter,
         filters=config.FILTERS
@@ -158,18 +171,18 @@ class Container(containers.DeclarativeContainer):
         StatEvaluator
     )
 
+    config_provider = providers.Factory(
+        ConfigProvider,
+        source_path=config.CONFIG_PATH
+    )
+
     baseline_control_experiment_use_case = providers.Factory(
         BaselineControlExperimentUseCase,
         stat_evaluator=stat_evaluator
     )
 
-    person_repository = providers.Factory(
-        PersonRepository,
-        source_path=config.META_SOURCE_PATH,
-    )
-
-    add_personal_data_use_case = providers.Factory(
-        AddPersonalDataUseCase,
-        repository=person_repository,
-        anchor_col=config.ANCHOR_COL
+    before_after_experiment_use_case = providers.Factory(
+        BeforeAfterExperimentUseCase,
+        stat_evaluator=stat_evaluator,
+        experiment_config=config_provider
     )
