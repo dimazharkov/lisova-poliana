@@ -3,7 +3,7 @@ from app.core.contracts.stat_evaluator_contract import StatEvaluatorContract
 from app.core.use_cases.experiments.base.groupped_effect import GroupedEffectExperimentUseCase
 
 
-class BeforeAfterExperimentUseCase(GroupedEffectExperimentUseCase):
+class ControlTreatmentExperimentUseCase(GroupedEffectExperimentUseCase):
     def __init__(
             self,
             stat_evaluator: StatEvaluatorContract,
@@ -12,7 +12,7 @@ class BeforeAfterExperimentUseCase(GroupedEffectExperimentUseCase):
         super().__init__(
             stat_evaluator,
             experiment_config=experiment_config,
-            experiment_hue="repeat"
+            experiment_hue="treatment"
         )
 
 

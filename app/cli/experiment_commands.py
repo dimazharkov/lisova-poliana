@@ -56,3 +56,32 @@ def before_after(
     before_after_experiment_use_case = container.before_after_experiment_use_case()
     experiment_controller = container.experiment_controller()
     experiment_controller.run(before_after_experiment_use_case)
+
+@app.command()
+def control_treatment(
+        source_path: List[str] = typer.Option(
+            ["control_norm.json"], help=""
+        ),
+        target_folder: str = typer.Option(
+            "before-after/control-3", help=""
+        ),
+        experiment: str = typer.Option(
+            "3", help=""
+        ),
+        config_path: str = typer.Option(
+            "config.json", help=""
+        )
+):
+    container = Container()
+    container.config.SOURCE_PATHS.from_value(source_path)
+    container.config.TARGET_PATH.from_value(target_folder)
+    container.config.CONFIG_PATH.from_value(config_path)
+    container.config.FILTERS.from_value(
+        {
+            "experiment": int(experiment)
+        }
+    )
+
+    control_treatment_experiment_use_case = container.control_treatment_experiment_use_case()
+    experiment_controller = container.experiment_controller()
+    experiment_controller.run(control_treatment_experiment_use_case)

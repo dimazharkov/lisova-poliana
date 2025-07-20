@@ -30,6 +30,7 @@ Data Analysis for the Lisova Poliana center
 - python main.py delta combine --source-path=control_delta.json --source-path=treatment_delta.json --target-path=delta.json
 - python main.py data inspect --source-path=delta.json --target-path=delta.json --noizy-feature-path=delta_noizy.json
 - python main.py data normalize --source-path=delta.json --target-path=delta_norm.json
+- python main.py data aggregate --source-path=delta_norm.json --target-path=delta_norm.json
 - python main.py data personalize --source-path=delta_norm.json --target-path=delta_norm.json --meta-path=source/personal_data.json
 ---
 5. Эксперименты
@@ -38,6 +39,17 @@ Data Analysis for the Lisova Poliana center
 - python main.py experiment before-after --source-path control_norm.json --target-folder=before-after/control-5 --experiment=5 --config-path=experiments/before-after-control-5.json
 - python main.py experiment before-after --source-path treatment_norm.json --target-folder=before-after/treatment-3 --experiment=3 --config-path=experiments/before-after-treatment-3.json
 - python main.py experiment before-after --source-path treatment_norm.json --target-folder=before-after/treatment-5 --experiment=5 --config-path=experiments/before-after-treatment-5.json
+- python main.py experiment control-treatment --source-path delta_norm.json --target-folder=control-treatment/treatment-3 --experiment=3 --config-path=experiments/control-treatment-treatment-3.json
+- python main.py experiment control-treatment --source-path delta_norm.json --target-folder=control-treatment/treatment-5 --experiment=5 --config-path=experiments/control-treatment-treatment-5.json
+
+6. Утилиты
+- python main.py utils experiment-map-file --source-path=control-treatment/treatment-5 --config-path=utils/experiment-map-file.json
+- python main.py utils export-experiment-data --source-path=control-treatment/treatment-5 --config-path=utils/experiment-map-file.json
+- python main.py utils export-experiment-data --source-path=control-treatment/treatment-3 --config-path=utils/experiment-map-file.json
+- python main.py utils export-experiment-data --source-path=before-after/control-3 --config-path=utils/experiment-map-file.json
+- python main.py utils export-experiment-data --source-path=before-after/control-5 --config-path=utils/experiment-map-file.json
+- python main.py utils export-experiment-data --source-path=before-after/treatment-3 --config-path=utils/experiment-map-file.json
+- python main.py utils export-experiment-data --source-path=before-after/treatment-5 --config-path=utils/experiment-map-file.json
 
 
 
@@ -78,3 +90,8 @@ Data Analysis for the Lisova Poliana center
 - найти когда в контрольной нет, в терапии есть и между группами есть
 - найти параметры, которые лучше всего реагировали: в группе и между
 - выделить параметры, которые хорошо реагировали везде
+
+---
+в подготовке данных нужно учесть, чтобы группы различались бинарно: 
+"repeat" = [0 | 1]
+"treatment" = [0 | 1]

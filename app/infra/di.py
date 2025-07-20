@@ -4,6 +4,7 @@ from app.controllers.data_controller import DataController
 from app.controllers.experiment_controller import ExperimentController
 from app.controllers.extract_controller import ExtractController
 from app.controllers.multi_data_controller import MultiDataController
+from app.controllers.util_controller import UtilController
 from app.core.use_cases.add_personal_data import AddPersonalDataUseCase
 from app.core.use_cases.aggregate_data import AggregateDataUseCase
 from app.core.use_cases.clear_data import ClearDataUseCase
@@ -12,6 +13,7 @@ from app.core.use_cases.add_treatment_data import SetupRepeatAndTreatmentUseCase
 from app.core.use_cases.combine_deltas import CombineDeltasUseCase
 from app.core.use_cases.experiments.baseline_control import BaselineControlExperimentUseCase
 from app.core.use_cases.experiments.before_after import BeforeAfterExperimentUseCase
+from app.core.use_cases.experiments.control_treatment import ControlTreatmentExperimentUseCase
 from app.core.use_cases.extract_data import ExtractDataUseCase
 from app.core.use_cases.extract_param_duplicates import ExtractParamDuplicatesUseCase
 from app.core.use_cases.extract_params import ExtractParamsUseCase
@@ -185,4 +187,14 @@ class Container(containers.DeclarativeContainer):
         BeforeAfterExperimentUseCase,
         stat_evaluator=stat_evaluator,
         experiment_config=config_provider
+    )
+
+    control_treatment_experiment_use_case = providers.Factory(
+        ControlTreatmentExperimentUseCase,
+        stat_evaluator=stat_evaluator,
+        experiment_config=config_provider
+    )
+
+    util_controller = providers.Singleton(
+        UtilController,
     )

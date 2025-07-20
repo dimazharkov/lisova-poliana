@@ -1,6 +1,0 @@
-from typing import Protocol, Any, Optional
-
-
-class ExperimentDesignContract(Protocol):
-    def get(self, key: str, default: Optional[Any] = None) -> Any: ...
-    def __getattr__(self, item: str) -> Any: ...

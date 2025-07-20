@@ -1,8 +1,9 @@
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 from app.config import config
-from app.utils.os_utils import load_from_disc
+from app.core.contracts.config_provider_contract import ConfigProviderContract
+from app.utils.os_utils import load_from_disc, save_to_disc
 
 
 class ConfigNode:
@@ -48,17 +49,30 @@ class ConfigNode:
         return result
 
 
-class ConfigProvider:
-    def __init__(self, source_path: str | Path, root: Optional[Path] = None) -> None:
-        root = root or config.config_path
-        raw_config = load_from_disc(source_path, root)
-        self._config = ConfigNode(raw_config)
+class ConfigProvider(ConfigProviderContract):
+    def __init__(self, source_path: Union[str, Path], root: Optional[Path] = None) -> None:
+        self.source_path = Path(source_path)
+        self.root = root or config.config_path  # config.config_path должен быть заранее определён
+        try:
+            raw_config = load_from_disc(self.source_path, self.root)
+            self._config = ConfigNode(raw_config)
+        except FileNotFoundError:
+            self._config = ConfigNode({})  # безопасное значение по умолчанию
 
     def __getattr__(self, item: str) -> Any:
-        return getattr(self._config, item)
+        config = self.__dict__.get("_config", None)
+        if config is None:
+            raise AttributeError(f"'ConfigProvider' has no attribute '{item}' (no config loaded)")
+        return getattr(config, item)
 
     def get(self, key: str, default: Optional[Any] = None) -> Any:
-        return getattr(self._config, key, default)
+        config = self.__dict__.get("_config", None)
+        if config is None:
+            return default
+        return config.get(key, default)
+
+    def save(self, data: dict):
+        save_to_disc(data, self.source_path, self.root)
 
     def __repr__(self):
-        return f"<ExperimentConfigurator {self._config}>"
+        return f"<ConfigProvider {getattr(self, '_config', None)}>"
