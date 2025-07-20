@@ -34,6 +34,11 @@ Data Analysis for the Lisova Poliana center
 ---
 5. Эксперименты
 - python main.py experiment baseline --source-path control_norm.json --source-path treatment_norm.json --target-folder=baseline
+- python main.py experiment before-after --source-path control_norm.json --target-folder=before-after/control-3 --experiment=3 --config-path=experiments/before-after-control-3.json
+- python main.py experiment before-after --source-path control_norm.json --target-folder=before-after/control-5 --experiment=5 --config-path=experiments/before-after-control-5.json
+- python main.py experiment before-after --source-path treatment_norm.json --target-folder=before-after/treatment-3 --experiment=3 --config-path=experiments/before-after-treatment-3.json
+- python main.py experiment before-after --source-path treatment_norm.json --target-folder=before-after/treatment-5 --experiment=5 --config-path=experiments/before-after-treatment-5.json
+
 
 
 Все пациенты: мужчины и женщины
@@ -64,3 +69,12 @@ Data Analysis for the Lisova Poliana center
 
 Отдельный эксперимент:
 - наиболее отзывчивые параметры
+
+---
+- между группами: 3, 5
+- параметры внутри группы: 3, 5
+- параметры между группами: 3, 5
+- пройтись по результатам, выбрать от weak, но учесть размер выборки
+- найти когда в контрольной нет, в терапии есть и между группами есть
+- найти параметры, которые лучше всего реагировали: в группе и между
+- выделить параметры, которые хорошо реагировали везде

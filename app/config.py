@@ -17,6 +17,7 @@ class Config(NamedTuple):
     cors_origins: List[str]
     root_path: Path
     static_path: Path
+    config_path: Path
     gemini_api_key: str
     openai_api_key: str
     hugging_face_token: str
@@ -34,6 +35,7 @@ def get_config() -> Config:
         cors_origins=["*"],
         root_path=root,
         static_path=root / "static",
+        config_path=root / "config",
         gemini_api_key=os.getenv("GEMINI_API_KEY", ""),
         openai_api_key=os.getenv("OPENAI_API_KEY", ""),
         hugging_face_token=os.getenv("HUGGING_FACE_TOKEN", ""),

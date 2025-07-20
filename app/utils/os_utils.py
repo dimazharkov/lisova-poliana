@@ -31,9 +31,10 @@ def save_plot_to_disc(fig: Figure, file_path: str | Path, dpi: int = 300) -> Non
     fig.savefig(full_file_path, dpi=dpi)
 
 
-def load_from_disc(file_path: str | Path) -> dict:
+def load_from_disc(file_path: str | Path, root: Path | None = None) -> dict:
     relative_path = Path(file_path.lstrip("/"))
-    full_file_path = config.static_path / relative_path
+    root_path = root or config.static_path
+    full_file_path = root_path / relative_path
 
     if not full_file_path.exists():
         raise FileNotFoundError(f"Missing file: {full_file_path}")
@@ -42,6 +43,6 @@ def load_from_disc(file_path: str | Path) -> dict:
         return json.load(f)
 
 
-def load_df_from_disc(file_path: str | Path) -> pd.DataFrame:
-    data = load_from_disc(file_path)
+def load_df_from_disc(file_path: str | Path, root: Path | None = None) -> pd.DataFrame:
+    data = load_from_disc(file_path, root)
     return pd.DataFrame(data)
