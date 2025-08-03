@@ -85,6 +85,7 @@ python main.py extract params --source-path=source/raw_data.json --target-path=s
 # Edit params.json manually to assign group names (e.g. "Амплітуда P (мкВ)" → "Амплітуда P (мкВ) — відведення I")
 python main.py extract param-duplicates --source-path=source/params.json --target-path=source/param_duplicates.json
 python main.py extract personal-data --source-path=source/raw_data.json --target-path=source/personal_data.json
+python main.py extract personal-indicators --source-path=source/raw_data.json --target-path=source/personal_indicators_data.json
 
 # 2. Control Data Preparation
 python main.py extract data --source-path=source/raw_data.json --target-path=control_data.json --data-key=контроль
@@ -93,6 +94,7 @@ python main.py data inspect --source-path=control_data.json --target-path=contro
 python main.py data normalize --source-path=control_data.json --target-path=control_norm.json
 python main.py data aggregate --source-path=control_norm.json --target-path=control_norm.json
 python main.py data personalize --source-path=control_norm.json --target-path=control_norm.json --meta-path=source/personal_data.json
+python main.py data add-indicators --source-path=control_norm.json --target-path=control_norm.json --meta-path=source/personal_indicators_data.json
 
 # 3. Treatment Data Preparation
 python main.py extract data --source-path=source/raw_data.json --target-path=treatment_data.json --data-key=Дих
@@ -101,6 +103,7 @@ python main.py data inspect --source-path=treatment_data.json --target-path=trea
 python main.py data normalize --source-path=treatment_data.json --target-path=treatment_norm.json
 python main.py data aggregate --source-path=treatment_norm.json --target-path=treatment_norm.json
 python main.py data personalize --source-path=treatment_norm.json --target-path=treatment_norm.json --meta-path=source/personal_data.json
+python main.py data add-indicators --source-path=treatment_norm.json --target-path=treatment_norm.json --meta-path=source/personal_indicators_data.json
 
 # 4. Delta Preparation
 python main.py delta build --source-path=control_data.json --target-path=control_delta.json
@@ -110,6 +113,7 @@ python main.py data inspect --source-path=delta.json --target-path=delta.json --
 python main.py data normalize --source-path=delta.json --target-path=delta_norm.json
 python main.py data aggregate --source-path=delta_norm.json --target-path=delta_norm.json
 python main.py data personalize --source-path=delta_norm.json --target-path=delta_norm.json --meta-path=source/personal_data.json
+python main.py data add-indicators --source-path=delta_norm.json --target-path=delta_norm.json --meta-path=source/personal_indicators_data.json
 
 # 5. Run Experiments
 python main.py experiment baseline --source-path control_norm.json --source-path treatment_norm.json --target-folder=baseline

@@ -1,5 +1,6 @@
 import typer
 
+from app.cli.handlers.util_handlers import util_experiment_map_file, util_export_experiment_data
 from app.infra.di import Container
 
 app = typer.Typer()
@@ -13,14 +14,9 @@ def experiment_map_file(
             "config.json", help=""
         )
 ):
-    container = Container()
-    container.config.CONFIG_PATH.from_value(config_path)
-    util_controller = container.util_controller()
-    config_provider = container.config_provider()
-
-    util_controller.experiment_map_file(
+    util_experiment_map_file(
         source_path=source_path,
-        config_provider=config_provider
+        config_path=config_path
     )
 
 @app.command()
@@ -32,13 +28,7 @@ def export_experiment_data(
             "config.json", help=""
         )
 ):
-    container = Container()
-    container.config.CONFIG_PATH.from_value(config_path)
-    util_controller = container.util_controller()
-    config_provider = container.config_provider()
-
-    util_controller.export_experiment_data(
+    util_export_experiment_data(
         source_path=source_path,
-        config_provider=config_provider
+        config_path=config_path
     )
-

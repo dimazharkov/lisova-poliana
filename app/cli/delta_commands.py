@@ -2,6 +2,7 @@ from typing import List
 
 import typer
 
+from app.cli.handlers.delta_handlers import delta_build, delta_combine
 from app.infra.di import Container
 
 app = typer.Typer()
@@ -15,13 +16,10 @@ def build(
             "", help=""
         ),
 ):
-    container = Container()
-    container.config.SOURCE_PATH.from_value(source_path)
-    container.config.TARGET_PATH.from_value(target_path)
-
-    build_delta_use_case = container.build_delta_use_case()
-    data_controller = container.data_controller()
-    data_controller.run(build_delta_use_case)
+    delta_build(
+        source_path=source_path,
+        target_path=target_path
+    )
 
 @app.command()
 def combine(
@@ -32,10 +30,7 @@ def combine(
             "delta.json", help=""
         ),
 ):
-    container = Container()
-    container.config.SOURCE_PATHS.from_value(source_path)
-    container.config.TARGET_PATH.from_value(target_path)
-
-    combine_deltas_use_case = container.combine_deltas_use_case()
-    multi_data_controller = container.multi_data_controller()
-    multi_data_controller.run(combine_deltas_use_case)
+    delta_combine(
+        source_path=source_path,
+        target_path=target_path
+    )

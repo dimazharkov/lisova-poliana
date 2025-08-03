@@ -139,6 +139,17 @@ class StatEvaluator(StatEvaluatorContract):
         else:
             p_strength = 0.0
 
+        # Оценка надежности результата
+        confidence = "high" if p_val < 0.05 else "low"
+
+        # Если p >= 0.1 — считаем, что статистической значимости нет
+        if p_val >= 0.1:
+            return StatConclusion(
+                score=0.0,
+                meaning="no significant change",
+                interpretation="No significant change (p ≥ 0.1), effect disregarded regardless of effect size. Statistical confidence: low."
+            )
+
         final_score = (r_strength + p_strength) / 2
         rounded_score = round(final_score, 4)
 
@@ -158,7 +169,7 @@ class StatEvaluator(StatEvaluatorContract):
         return StatConclusion(
             score=rounded_score,
             meaning=meaning,
-            interpretation=f"{meaning.capitalize()} effect ({direction}), based on p-value and rank biserial correlation."
+            interpretation=f"{meaning.capitalize()} effect ({direction}), based on p-value and rank biserial correlation. Statistical confidence: {confidence}."
         )
 
     @staticmethod
@@ -183,6 +194,17 @@ class StatEvaluator(StatEvaluatorContract):
         else:
             p_strength = 0.0
 
+        # Надежность вывода
+        confidence = "high" if p_value < 0.05 else "low"
+
+        # Отсечка: если p ≥ 0.1 — игнорируем даже сильный эффект
+        if p_value >= 0.1:
+            return StatConclusion(
+                score=0.0,
+                meaning="no significant change",
+                interpretation="No significant change (p ≥ 0.1), effect disregarded regardless of effect size. Statistical confidence: low."
+            )
+
         final_score = (d_strength + p_strength) / 2
         rounded_score = round(final_score, 4)
 
@@ -202,5 +224,106 @@ class StatEvaluator(StatEvaluatorContract):
         return StatConclusion(
             score=rounded_score,
             meaning=meaning,
-            interpretation=f"{meaning.capitalize()} effect ({direction}), based on p-value and Cohen's d."
+            interpretation=f"{meaning.capitalize()} effect ({direction}), based on p-value and Cohen's d. Statistical confidence: {confidence}."
         )
+
+
+"""
+Шкалы интерпретации значимости и силы эффекта для U-теста:
+
+1. Rank-biserial correlation (r):
+   Используется как мера силы эффекта для U-теста (альтернатива Cohen's d).
+   Интерпретация основана на общепринятых порогах:
+     - |r| ≥ 0.50 → сильный эффект
+     - |r| ≥ 0.30 → умеренный эффект
+     - |r| ≥ 0.10 → слабый эффект
+     - |r| <  0.10 → эффект отсутствует или пренебрежимо мал
+
+   Эти значения трансформируются в r_strength:
+     - 1.0 для сильного
+     - 0.8 для умеренного
+     - 0.4 для слабого
+     - 0.0 для отсутствующего
+
+2. p-value:
+   Отражает статистическую значимость разницы:
+     - p < 0.01 → очень высокая значимость
+     - p < 0.05 → стандартный уровень значимости
+     - p < 0.10 → допустимая значимость (на грани)
+     - p ≥ 0.10 → незначимое отличие
+
+   Эти значения трансформируются в p_strength:
+     - 1.0 для p < 0.01
+     - 0.6 для p < 0.05
+     - 0.3 для p < 0.10
+     - 0.0 для p ≥ 0.10
+
+3. Итоговая оценка (final_score):
+   Вычисляется как среднее между r_strength и p_strength.
+   Это эвристическая мера, объединяющая статистическую значимость и силу эффекта.
+   Она интерпретируется как:
+     - ≥ 0.9 → very strong
+     - ≥ 0.7 → strong
+     - ≥ 0.5 → moderate
+     - ≥ 0.2 → weak
+     - <  0.2 → no significant change
+
+4. Дополнительно:
+   Направление эффекта (positive/negative) определяется знаком rank_biserial_r.
+
+Этот подход предназначен для практической, человеко-ориентированной интерпретации,
+например в отчетах или UI, и не заменяет строгий статистический анализ.
+"""
+
+
+
+"""
+Шкалы интерпретации значимости и силы эффекта для t-теста:
+
+1. Cohen's d:
+   Используется как мера силы эффекта при сравнении средних.
+   Интерпретация основана на рекомендациях J. Cohen (1988):
+     - |d| ≥ 0.8 → большой (large) эффект
+     - |d| ≥ 0.5 → средний (medium) эффект
+     - |d| ≥ 0.2 → слабый (small) эффект
+     - |d| <  0.2 → эффект отсутствует или пренебрежимо мал
+
+   Эти значения трансформируются в d_strength:
+     - 1.0 для большого эффекта
+     - 0.8 для среднего
+     - 0.4 для слабого
+     - 0.0 для отсутствующего
+
+2. p-value:
+   Отражает статистическую значимость разницы между группами:
+     - p < 0.01 → очень высокая значимость
+     - p < 0.05 → стандартный уровень значимости
+     - p < 0.10 → низкий уровень значимости (на грани)
+     - p ≥ 0.10 → незначимо
+
+   Эти значения трансформируются в p_strength:
+     - 1.0 для p < 0.01
+     - 0.6 для p < 0.05
+     - 0.3 для p < 0.10
+     - 0.0 для p ≥ 0.10
+
+3. Оценка доверия:
+   Если p-value < 0.05 → confidence = "high"
+   Если p-value ≥ 0.05 → confidence = "low"
+
+4. Итоговая оценка (final_score):
+   Вычисляется как среднее между d_strength и p_strength.
+   Это эвристическая мера, объединяющая статистическую значимость и силу эффекта.
+   Интерпретация:
+     - ≥ 0.9 → very strong
+     - ≥ 0.7 → strong
+     - ≥ 0.5 → moderate
+     - ≥ 0.2 → weak
+     - <  0.2 → no significant change
+
+5. Дополнительно:
+   Направление эффекта (positive / negative) определяется знаком Cohen’s d.
+
+Важно: финальная оценка и вывод предназначены для практической интерпретации и отчетности. 
+Они не заменяют формальный статистический анализ, но позволяют автоматизировать классификацию результатов.
+"""

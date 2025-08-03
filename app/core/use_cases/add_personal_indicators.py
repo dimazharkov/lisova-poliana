@@ -4,7 +4,7 @@ from app.core.contracts.repository_contract import RepositoryContract
 from app.core.contracts.use_case_contract import UseCaseContract
 
 
-class AddPersonalDataUseCase(UseCaseContract):
+class AddPersonalIndicatorsUseCase(UseCaseContract):
     def __init__(self, repository: RepositoryContract, merge_col: str = "person", anchor_col: str = "h1"):
         self.metadata = repository.all()
         self.merge_col = merge_col

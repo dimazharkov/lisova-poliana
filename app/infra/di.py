@@ -3,9 +3,11 @@ from dependency_injector import containers, providers
 from app.controllers.data_controller import DataController
 from app.controllers.experiment_controller import ExperimentController
 from app.controllers.extract_controller import ExtractController
+from app.controllers.import_controller import ImportController
 from app.controllers.multi_data_controller import MultiDataController
 from app.controllers.util_controller import UtilController
 from app.core.use_cases.add_personal_data import AddPersonalDataUseCase
+from app.core.use_cases.add_personal_indicators import AddPersonalIndicatorsUseCase
 from app.core.use_cases.aggregate_data import AggregateDataUseCase
 from app.core.use_cases.clear_data import ClearDataUseCase
 from app.core.use_cases.build_delta import BuildDeltaUseCase
@@ -18,6 +20,7 @@ from app.core.use_cases.extract_data import ExtractDataUseCase
 from app.core.use_cases.extract_param_duplicates import ExtractParamDuplicatesUseCase
 from app.core.use_cases.extract_params import ExtractParamsUseCase
 from app.core.use_cases.extract_personal_data import ExtractPersonalDataUseCase
+from app.core.use_cases.extract_personal_indicators import ExtractPersonalIndicatorsUseCase
 from app.core.use_cases.feature_inspect import FeatureInspectUseCase
 from app.core.use_cases.normalize_data import NormalizeDataUseCase
 from app.core.use_cases.preprocess_data import PreprocessDataUseCase
@@ -27,6 +30,7 @@ from app.infra.filters.column_filter import ColumnFilter
 from app.infra.filters.data_filter import DataFilter
 from app.repositories.data_repository import DataRepository
 from app.repositories.experiment_repository import ExperimentRepository
+from app.repositories.indicators_repository import IndicatorsRepository
 from app.repositories.json_repository import JsonRepository
 from app.repositories.multi_data_repository import MultiDataRepository
 from app.repositories.person_repository import PersonRepository
@@ -125,6 +129,10 @@ class Container(containers.DeclarativeContainer):
         ExtractPersonalDataUseCase
     )
 
+    extract_personal_indicators_use_case = providers.Singleton(
+        ExtractPersonalIndicatorsUseCase
+    )
+
     extract_data_use_case = providers.Factory(
         ExtractDataUseCase,
         data_key=config.DATA_KEY
@@ -149,6 +157,19 @@ class Container(containers.DeclarativeContainer):
     add_personal_data_use_case = providers.Factory(
         AddPersonalDataUseCase,
         repository=person_repository,
+        merge_col=config.MERGE_COL,
+        anchor_col=config.ANCHOR_COL
+    )
+
+    indicators_repository = providers.Factory(
+        IndicatorsRepository,
+        source_path=config.META_SOURCE_PATH,
+    )
+
+    add_personal_indicators_use_case = providers.Factory(
+        AddPersonalIndicatorsUseCase,
+        repository=indicators_repository,
+        merge_col=config.MERGE_COL,
         anchor_col=config.ANCHOR_COL
     )
 
@@ -197,4 +218,8 @@ class Container(containers.DeclarativeContainer):
 
     util_controller = providers.Singleton(
         UtilController,
+    )
+
+    import_controller = providers.Singleton(
+        ImportController,
     )

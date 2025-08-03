@@ -2,6 +2,8 @@ from typing import List
 
 import typer
 
+from app.cli.handlers.experiment_handlers import experiment_baseline, experiment_before_after, \
+    experiment_control_treatment
 from app.infra.di import Container
 
 app = typer.Typer()
@@ -15,18 +17,10 @@ def baseline(
             "baseline", help=""
         )
 ):
-    container = Container()
-    container.config.SOURCE_PATHS.from_value(source_path)
-    container.config.TARGET_PATH.from_value(target_folder)
-    container.config.FILTERS.from_value(
-        {
-            "repeat": 0 # только начальные данные
-        }
+    experiment_baseline(
+        source_path=source_path,
+        target_folder=target_folder
     )
-
-    baseline_control_experiment_use_case = container.baseline_control_experiment_use_case()
-    experiment_controller = container.experiment_controller()
-    experiment_controller.run(baseline_control_experiment_use_case)
 
 @app.command()
 def before_after(
@@ -43,19 +37,12 @@ def before_after(
             "config.json", help=""
         )
 ):
-    container = Container()
-    container.config.SOURCE_PATHS.from_value(source_path)
-    container.config.TARGET_PATH.from_value(target_folder)
-    container.config.CONFIG_PATH.from_value(config_path)
-    container.config.FILTERS.from_value(
-        {
-            "experiment": int(experiment)
-        }
+    experiment_before_after(
+        source_path=source_path,
+        target_folder=target_folder,
+        experiment=experiment,
+        config_path=config_path
     )
-
-    before_after_experiment_use_case = container.before_after_experiment_use_case()
-    experiment_controller = container.experiment_controller()
-    experiment_controller.run(before_after_experiment_use_case)
 
 @app.command()
 def control_treatment(
@@ -72,16 +59,9 @@ def control_treatment(
             "config.json", help=""
         )
 ):
-    container = Container()
-    container.config.SOURCE_PATHS.from_value(source_path)
-    container.config.TARGET_PATH.from_value(target_folder)
-    container.config.CONFIG_PATH.from_value(config_path)
-    container.config.FILTERS.from_value(
-        {
-            "experiment": int(experiment)
-        }
+    experiment_control_treatment(
+        source_path=source_path,
+        target_folder=target_folder,
+        experiment=experiment,
+        config_path=config_path
     )
-
-    control_treatment_experiment_use_case = container.control_treatment_experiment_use_case()
-    experiment_controller = container.experiment_controller()
-    experiment_controller.run(control_treatment_experiment_use_case)
