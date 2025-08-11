@@ -3,7 +3,7 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
-from app.core.contracts.column_filter_contract import ColumnFilterContract
+from app.core.contracts.column_filter_contract import ColumnListFilterContract
 from app.core.contracts.use_case_contract import UseCaseContract
 
 
@@ -12,7 +12,7 @@ class BuildDeltaUseCase(UseCaseContract):
         data = data.copy()
         data = data.drop(columns=["repeat"])
 
-        group_cols = ["person", "sex", "dob", "age", "category", "experiment", "treatment"]
+        group_cols = ["person", "sex", "dob", "age", "age_over_40", "category", "experiment", "treatment"]
         param_cols = [col for col in data.columns if col not in group_cols]
 
         def compute_delta(group: pd.DataFrame) -> Optional[pd.Series]:

@@ -4,12 +4,18 @@ from app.infra.di import Container
 def data_preparation(
         source_path: str,
         target_path: str,
-        treatment: int
+        treatment: int,
+        column_names: list,
+        column_indexes: list,
+        keep_columns: bool
 ) -> None:
     container = Container()
     container.config.SOURCE_PATH.from_value(source_path)
     container.config.TARGET_PATH.from_value(target_path)
     container.config.TREATMENT.from_value(treatment)
+    container.config.COLUMN_NAMES.from_value(column_names)
+    container.config.COLUMN_INDEXES.from_value(column_indexes)
+    container.config.KEEP_COLUMNS.from_value(keep_columns)
 
     preprocess_data_use_case = container.preprocess_data_use_case()
     data_controller = container.data_controller()

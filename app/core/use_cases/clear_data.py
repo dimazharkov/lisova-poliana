@@ -20,15 +20,20 @@ class ClearDataUseCase(UseCaseContract):
 
         data["h151"] = data["h151"].map(h151_map)
 
-        experiment_map = {
-            '3 хв сидячи': 3,
-            '5 хв лежачи': 5,
-            '5л п': 5,
-            '3с п': 3,
-            '5лп': 5,
-            '3сп': 3
-        }
-        data["experiment"] = data["experiment"].map(experiment_map)
+        # experiment_map = {
+        #     '3 хв сидячи': 3,
+        #     '5 хв лежачи': 5,
+        #     '5л п': 5,
+        #     '3с п': 3,
+        #     '5лп': 5,
+        #     '3сп': 3
+        # }
+        # print(data["experiment"].tolist())
+        # data["experiment"] = data["experiment"].map(experiment_map).astype(int)
+        data["experiment"] = pd.to_numeric(
+            data["experiment"].astype(str).str.extract(r"(\d+)")[0],
+            errors="coerce"
+        )
 
         sex_map = {
             'Чоловіча': 'm',
@@ -47,9 +52,13 @@ class ClearDataUseCase(UseCaseContract):
             data.columns.get_loc("dob") + 1, "age",
             (current_year - pd.to_datetime(data["dob"], errors="coerce", dayfirst=True).dt.year)
         )
-
+        data.insert(
+            data.columns.get_loc("age") + 1,
+            "age_over_40",
+            (data["age"] > 40).astype(int)
+        )
         # 3. Найти колонки, где хранятся параметры (все кроме служебных)
-        meta_cols = ["person", "sex", "dob", "category", "experiment", "experiment_date"]
+        meta_cols = ["person", "sex", "dob", "age", "age_over_40", "category", "experiment", "experiment_date"]
         param_cols = [col for col in data.columns if col not in meta_cols]
 
         # 4. Очистка значений параметров
@@ -58,9 +67,12 @@ class ClearDataUseCase(UseCaseContract):
                 data[col]
                 .astype(str)
                 .str.replace(",", ".", regex=False)
-                .str.replace(r"[^\d\.\-]", "", regex=True)
-                .replace(["", "-", "nan"], np.nan),
+                .str.replace(r"[^\d\.\-]", "", regex=True),
+                # .replace(["", "-", "nan"], np.nan),
                 errors="coerce"
             )
+
+        # print("clear_data")
+        # print(data["h155"].unique())
 
         return data

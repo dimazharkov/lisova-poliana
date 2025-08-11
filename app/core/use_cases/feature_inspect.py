@@ -4,14 +4,14 @@ from typing import List
 
 import pandas as pd
 
-from app.core.contracts.column_filter_contract import ColumnFilterContract
+from app.core.contracts.column_filter_contract import ColumnListFilterContract
 from app.core.contracts.repository_contract import RepositoryContract
 from app.core.contracts.use_case_contract import UseCaseContract
 from app.core.utils.stat_utils import column_statistics, clean_outliers
 
 
 class FeatureInspectUseCase(UseCaseContract):
-    def __init__(self, repository: RepositoryContract, column_filter: ColumnFilterContract) -> None:
+    def __init__(self, repository: RepositoryContract, column_filter: ColumnListFilterContract) -> None:
         self.repository = repository
         self.column_filter = column_filter
 
@@ -23,9 +23,9 @@ class FeatureInspectUseCase(UseCaseContract):
         noizy_columns = []
         noizy_stat = {}
         for col in target_columns:
-            cleaned_series = clean_outliers(data[col])
-            data[col] = cleaned_series
-            stat = column_statistics(cleaned_series)
+            # cleaned_series = clean_outliers(data[col])  # <<<<< ------ ОЧЕНЬ ОПАСНО ТУТ ЧИСТИТЬ, нужно перенести
+            # data[col] = cleaned_series
+            stat = column_statistics(data[col])
             if stat.exclusion_rate > 0.6 or stat.zero_percentage > 90:
                 noizy_columns.append(col)
                 noizy_stat[col] = asdict(stat)
@@ -33,5 +33,4 @@ class FeatureInspectUseCase(UseCaseContract):
         self.repository.save(noizy_stat)
 
         data = data.drop(columns=noizy_columns)
-
         return data

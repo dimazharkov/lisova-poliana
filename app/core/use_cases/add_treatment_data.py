@@ -24,9 +24,24 @@ class SetupRepeatAndTreatmentUseCase(UseCaseContract):
             )
         )
 
-        data.insert(
-            data.columns.get_loc("repeat") + 1, "treatment", self.treatment
-        )
         data = data[data["repeat"] <= 1]
+
+        # удаляем строки, где все h*-колонки пустые
+        h_cols = data.filter(regex=r"^h\d+$").columns
+        data = data.dropna(subset=h_cols, how="all")
+
+        # оставляем только если есть точно две строки repeat=0 и repeat=1
+        data = data.groupby(group_fields, as_index=False).filter(
+            lambda g: len(g) == 2 and set(g["repeat"]) == {0, 1}
+        ).reset_index(drop=True)
+
+        data.insert(
+            data.columns.get_loc("repeat") + 1,
+            "treatment",
+            self.treatment
+        )
+
+        # print("add_treatment_data")
+        # print(data["h155"].unique())
 
         return data

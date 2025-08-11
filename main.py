@@ -2,7 +2,7 @@ import typer
 
 from app.cli import (
     experiment_commands, data_commands, extract_commands,
-    test_commands, delta_commands, util_commands, import_commands
+    test_commands, delta_commands, util_commands, import_commands, pipeline_commands
 )
 
 app = typer.Typer()
@@ -13,6 +13,7 @@ app.add_typer(delta_commands.app, name="delta")
 app.add_typer(test_commands.app, name="test")
 app.add_typer(util_commands.app, name="utils")
 app.add_typer(import_commands.app, name="import")
+app.add_typer(pipeline_commands.app, name="pipeline")
 
 if __name__ == "__main__":
     app()

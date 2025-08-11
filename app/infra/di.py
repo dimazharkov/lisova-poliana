@@ -15,7 +15,7 @@ from app.core.use_cases.add_treatment_data import SetupRepeatAndTreatmentUseCase
 from app.core.use_cases.combine_deltas import CombineDeltasUseCase
 from app.core.use_cases.experiments.baseline_control import BaselineControlExperimentUseCase
 from app.core.use_cases.experiments.before_after import BeforeAfterExperimentUseCase
-from app.core.use_cases.experiments.control_treatment import ControlTreatmentExperimentUseCase
+from app.core.use_cases.experiments.params_before_after import ParamsBeforeAfterExperimentUseCase
 from app.core.use_cases.extract_data import ExtractDataUseCase
 from app.core.use_cases.extract_param_duplicates import ExtractParamDuplicatesUseCase
 from app.core.use_cases.extract_params import ExtractParamsUseCase
@@ -25,8 +25,9 @@ from app.core.use_cases.feature_inspect import FeatureInspectUseCase
 from app.core.use_cases.normalize_data import NormalizeDataUseCase
 from app.core.use_cases.preprocess_data import PreprocessDataUseCase
 from app.infra.evaluators.stat_evaluator import StatEvaluator
+from app.infra.filters.dataframe_column_filter import DataFrameColumnFilter
 from app.infra.providers.config_provider import ConfigProvider
-from app.infra.filters.column_filter import ColumnFilter
+from app.infra.filters.column_list_filter import ColumnListFilter
 from app.infra.filters.data_filter import DataFilter
 from app.repositories.data_repository import DataRepository
 from app.repositories.experiment_repository import ExperimentRepository
@@ -91,7 +92,7 @@ class Container(containers.DeclarativeContainer):
     )
 
     column_filter = providers.Factory(
-        ColumnFilter,
+        ColumnListFilter,
         include_patterns=config.INCLUDE_PATTERS,
         exclude_fields=config.EXCLUDE_FIELDS
     )
@@ -111,10 +112,18 @@ class Container(containers.DeclarativeContainer):
         # column_filter=column_filter
     )
 
+    dataframe_column_filter = providers.Factory(
+        DataFrameColumnFilter,
+        columns=config.COLUMN_NAMES,
+        indexes=config.COLUMN_INDEXES,
+        keep=config.KEEP_COLUMNS,
+    )
+
     preprocess_data_use_case = providers.Singleton(
         PreprocessDataUseCase,
         clear_data_use_case=clear_data_use_case,
-        setup_repeat_and_treatment_use_case=setup_repeat_and_treatment_use_case
+        setup_repeat_and_treatment_use_case=setup_repeat_and_treatment_use_case,
+        dataframe_column_filter=dataframe_column_filter
     )
 
     extract_params_use_case = providers.Singleton(
@@ -207,13 +216,10 @@ class Container(containers.DeclarativeContainer):
     before_after_experiment_use_case = providers.Factory(
         BeforeAfterExperimentUseCase,
         stat_evaluator=stat_evaluator,
-        experiment_config=config_provider
-    )
-
-    control_treatment_experiment_use_case = providers.Factory(
-        ControlTreatmentExperimentUseCase,
-        stat_evaluator=stat_evaluator,
-        experiment_config=config_provider
+        experiment_config=config_provider,
+        hue_field=config.HUE_FIELD,
+        grouping_fields=config.GROUPING_FIELDS,
+        effect_field=config.EFFECT_FIELD
     )
 
     util_controller = providers.Singleton(
@@ -222,4 +228,11 @@ class Container(containers.DeclarativeContainer):
 
     import_controller = providers.Singleton(
         ImportController,
+    )
+
+    params_before_after_experiment_use_case = providers.Factory(
+        ParamsBeforeAfterExperimentUseCase,
+        stat_evaluator=stat_evaluator,
+        experiment_config=config_provider,
+        experiment_hue=config.HUE_PARAM
     )

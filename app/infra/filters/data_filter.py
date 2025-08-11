@@ -40,17 +40,25 @@ class DataFilter(DataFilterContract):
             return data
 
         data = data.copy()
+
         for col, value in self.filters.items():
+            # приводим колонку к числовому виду
+            series = pd.to_numeric(data[col], errors="coerce")
+
             if isinstance(value, tuple):  # например: ('>', 40)
                 op, threshold = value
+                threshold = pd.to_numeric(pd.Series([threshold]), errors="coerce").iloc[0]
+
                 if op == '>':
-                    data = data[data[col] > threshold]
+                    data = data[series > threshold]
                 elif op == '<':
-                    data = data[data[col] < threshold]
+                    data = data[series < threshold]
                 elif op == '<=':
-                    data = data[data[col] <= threshold]
+                    data = data[series <= threshold]
                 elif op == '>=':
-                    data = data[data[col] >= threshold]
+                    data = data[series >= threshold]
             else:
-                data = data[data[col] == value]
+                value = pd.to_numeric(pd.Series([value]), errors="coerce").iloc[0]
+                data = data[series == value]
+
         return data

@@ -8,11 +8,12 @@ class ExperimentController:
 
     def run(self, use_case: ExperimentUseCaseContract) -> None:
         data = self.experiment_repository.all()
+
         experiment_results = use_case.run(
             data
         )
         self.experiment_repository.save(
             experiment_results
         )
-        print("done!")
+        # print("done!")
 

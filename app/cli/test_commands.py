@@ -20,4 +20,4 @@ def baseline():
     combined = combined[combined["repeat"] == 0]
 
     dto = use_case.run(combined)
-    print(json.dumps(dto.data, indent=4, ensure_ascii=False))
+    # print(json.dumps(dto.data, indent=4, ensure_ascii=False))

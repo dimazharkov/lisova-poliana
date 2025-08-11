@@ -20,7 +20,7 @@ class ImportController:
         # Сохраняем каждый лист как JSON
         all_data = self._get_all_sheets_data_as_dict(spreadsheet)
         save_to_disc(all_data, target_path)
-        print(f"Imported data to {target_path}")
+        # print(f"Imported data to {target_path}")
 
     def _get_all_sheets_data_as_dict(self, spreadsheet: Spreadsheet) -> dict:
         result = {}

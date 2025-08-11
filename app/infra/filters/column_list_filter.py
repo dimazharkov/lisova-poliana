@@ -1,10 +1,10 @@
 import re
 from typing import List, Optional
 
-from app.core.contracts.column_filter_contract import ColumnFilterContract
+from app.core.contracts.column_filter_contract import ColumnListFilterContract
 
 
-class ColumnFilter(ColumnFilterContract):
+class ColumnListFilter(ColumnListFilterContract):
     def __init__(
         self,
         include_patterns: Optional[List[str]] = None,  # теперь это regex-паттерны

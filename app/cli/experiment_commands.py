@@ -3,7 +3,7 @@ from typing import List
 import typer
 
 from app.cli.handlers.experiment_handlers import experiment_baseline, experiment_before_after, \
-    experiment_control_treatment
+    experiment_control_treatment, experiment_params_before_after, experiment_params_delta_before_after
 from app.infra.di import Container
 
 app = typer.Typer()
@@ -65,3 +65,48 @@ def control_treatment(
         experiment=experiment,
         config_path=config_path
     )
+
+@app.command()
+def params_before_after(
+        source_path: List[str] = typer.Option(
+            ["control_norm.json"], help=""
+        ),
+        target_folder: str = typer.Option(
+            "before-after/control-3", help=""
+        ),
+        experiment: str = typer.Option(
+            "3", help=""
+        ),
+        config_path: str = typer.Option(
+            "config.json", help=""
+        )
+):
+    experiment_params_before_after(
+        source_path=source_path,
+        target_folder=target_folder,
+        experiment=experiment,
+        config_path=config_path
+    )
+
+@app.command()
+def params_delta_before_after(
+        source_path: List[str] = typer.Option(
+            ["control_norm.json"], help=""
+        ),
+        target_folder: str = typer.Option(
+            "before-after/control-3", help=""
+        ),
+        experiment: str = typer.Option(
+            "3", help=""
+        ),
+        config_path: str = typer.Option(
+            "config.json", help=""
+        )
+):
+    experiment_params_delta_before_after(
+        source_path=source_path,
+        target_folder=target_folder,
+        experiment=experiment,
+        config_path=config_path
+    )
+

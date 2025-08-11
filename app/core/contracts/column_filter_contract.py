@@ -1,5 +1,5 @@
 from typing import Protocol, List
 
 
-class ColumnFilterContract(Protocol):
+class ColumnListFilterContract(Protocol):
     def filter(self, columns: List[str]) -> List[str]: ...

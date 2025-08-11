@@ -29,8 +29,8 @@ class ExtractPersonalIndicatorsUseCase(ExtractUseCaseContract):
             .astype("Float64")
         )
 
-        data["pcl_avg"] = data[["pcl_in", "pcl_out"]].mean(axis=1)
-        data["nsi_avg"] = data[["nsi_in", "nsi_out"]].mean(axis=1)
+        data["pcl_avg"] = data[["pcl_in", "pcl_out"]].mean(axis=1, skipna=True, min_count=1)
+        data["nsi_avg"] = data[["nsi_in", "nsi_out"]].mean(axis=1, skipna=True, min_count=1)
 
         data = data[data["full_name"].fillna("").str.strip() != ""]
 
