@@ -8,6 +8,9 @@ from app.core.contracts.use_case_contract import UseCaseContract
 
 
 class BuildDeltaUseCase(UseCaseContract):
+    def __init__(self, absolute_delta: bool = False):
+        self.absolute_delta = absolute_delta
+
     def run(self, data: pd.DataFrame) -> pd.DataFrame:
         data = data.copy()
         data = data.drop(columns=["repeat"])
@@ -35,7 +38,10 @@ class BuildDeltaUseCase(UseCaseContract):
 
                 if pd.notnull(val1) and pd.notnull(val2):
                     epsilon = 1e-8
-                    log_val = np.log1p(np.abs((val2 - val1) / (val1 + epsilon)))
+                    if self.absolute_delta:
+                        log_val = np.log1p(np.abs((val2 - val1) / (val1 + epsilon)))
+                    else:
+                        log_val = np.log1p((val2 - val1) / (val1 + epsilon))
                     log_deltas[col] = log_val
                 else:
                     log_deltas[col] = None

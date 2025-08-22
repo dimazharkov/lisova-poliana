@@ -18,17 +18,32 @@ class BeforeAfterExperimentUseCase(ExperimentUseCaseContract):
             experiment_config: ConfigProviderContract,
             hue_field: str,
             grouping_fields: Optional[list[str]] = None,
-            effect_field: str = "median_effect",
-            index_fields: Optional[list[str]] = None
+            effect_field: str = "median_effect"
     ):
         self.stat_evaluator = stat_evaluator
         self.experiment_config = experiment_config
         self.hue_field = hue_field
         self.grouping_fields = grouping_fields
         self.effect_field = effect_field
-        self.index_fields = index_fields
 
     def run(self, data: pd.DataFrame) -> ExperimentResultDTO:
+
+        # print(f">> repeat={len(data[data["repeat"] == 0])}:{len(data[data['repeat'] == 1])}")
+        #
+        # print(data["age_over_40"].unique())
+        # print(f"age_over_40={len(data[data["age_over_40"] == 0])}:{len(data[data['age_over_40'] == 1])}")
+        #
+        # print(data["overweight"].unique())
+        # print(f"overweight={len(data[data["overweight"] == 0])}:{len(data[data['overweight'] == 1])}")
+        #
+        # print(data["high_blood_pressure"].unique())
+        # print(f"high_blood_pressure={len(data[data["high_blood_pressure"] == 0])}:{len(data[data['high_blood_pressure'] == 1])}")
+        #
+        # print(data["pcl_exceeded"].unique())
+        # print(f"pcl_exceeded={len(data[data["pcl_exceeded"] == 0])}:{len(data[data['pcl_exceeded'] == 1])}")
+        #
+        # print(data["nsi_exceeded"].unique())
+        # print(f"nsi_exceeded={len(data[data["nsi_exceeded"] == 0])}:{len(data[data['nsi_exceeded'] == 1])}")
         result_data = {}
         result_figs = {}
 
@@ -51,10 +66,13 @@ class BeforeAfterExperimentUseCase(ExperimentUseCaseContract):
         stats, figures = {}, {}
         config = self.experiment_config.overall
 
-        # g0 = data[data[self.hue_field].astype(int) == 0][self.effect_field]
-        # g1 = data[data[self.hue_field].astype(int) == 1][self.effect_field]
-        g0 = self.prep_series(data, hue_value=0)
-        g1 = self.prep_series(data, hue_value=1)
+        g0 = data[data[self.hue_field].astype(int) == 0][self.effect_field]
+        g1 = data[data[self.hue_field].astype(int) == 1][self.effect_field]
+        # (*self.index_fields, self.effect_field) if self.index_fields else [self.effect_field]
+
+        # print(data[self.effect_field].unique())
+        # print("g0 count:", len(g0))
+        # print("g1 count:", len(g1))
 
         stats[key] = asdict(self.stat_evaluator.evaluate(g0, g1))
 
@@ -102,27 +120,9 @@ class BeforeAfterExperimentUseCase(ExperimentUseCaseContract):
 
         for val in data[grouping_field].dropna().unique():
             subset = data[data[grouping_field] == val]
-            # g0 = subset[subset[self.hue_field] == 0][self.effect_field]
-            # g1 = subset[subset[self.hue_field] == 1][self.effect_field]
-            g0 = self.prep_series(subset, hue_value=0)
-            g1 = self.prep_series(subset, hue_value=1)
+            g0 = subset[subset[self.hue_field] == 0][self.effect_field]
+            g1 = subset[subset[self.hue_field] == 1][self.effect_field]
             stats[f"{grouping_field}_{val}"] = asdict(self.stat_evaluator.evaluate(g0, g1))
 
         return stats, figures
 
-    def prep_series(self, data: pd.DataFrame, hue_value: int) -> pd.Series:
-        """
-        Возвращает Series значений effect_field,
-        индексированных по index_fields (если заданы).
-        """
-        df = data[data[self.hue_field].astype(int) == hue_value].copy()
-        df = df.dropna(subset=[self.effect_field])
-
-        if not self.index_fields:
-            # независимый сценарий — обычная серия без ключа
-            return df[self.effect_field].astype(float)
-
-        # парный сценарий — задаём индекс из index_fields
-        s = df.set_index(self.index_fields)[self.effect_field].astype(float)
-
-        return s

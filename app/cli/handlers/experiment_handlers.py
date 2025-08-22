@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Literal
 
 from app.infra.di import Container
 
@@ -27,7 +27,8 @@ def experiment_before_after(
         config_path: str,
         hue_field: str,
         effect_field: str = "median_effect",
-        grouping_fields: Optional[list[str]] = None
+        grouping_fields: Optional[list[str]] = None,
+        test_type: Literal["paired", "independent"] = "independent"
 ):
     container = Container()
     container.config.SOURCE_PATHS.from_value(source_path)
@@ -41,6 +42,7 @@ def experiment_before_after(
             "experiment": int(experiment)
         }
     )
+    container.config.TEST_TYPE.from_value(test_type)
 
     before_after_experiment_use_case = container.before_after_experiment_use_case()
     experiment_controller = container.experiment_controller()
@@ -70,7 +72,8 @@ def experiment_params_before_after(
         source_path: list[str],
         target_folder: str,
         experiment: str,
-        config_path: str
+        config_path: str,
+        test_type: Literal["paired", "independent"] = "independent"
 ):
     container = Container()
     container.config.SOURCE_PATHS.from_value(source_path)
@@ -82,6 +85,7 @@ def experiment_params_before_after(
             "experiment": int(experiment)
         }
     )
+    container.config.TEST_TYPE.from_value(test_type)
 
     params_before_after_experiment_use_case = container.params_before_after_experiment_use_case()
     experiment_controller = container.experiment_controller()

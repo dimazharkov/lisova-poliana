@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Literal
 
 import typer
 
@@ -35,13 +35,17 @@ def before_after(
         ),
         config_path: str = typer.Option(
             "config.json", help=""
+        ),
+        test_type: str = typer.Option(
+            "independent", help=""
         )
 ):
     experiment_before_after(
         source_path=source_path,
         target_folder=target_folder,
         experiment=experiment,
-        config_path=config_path
+        config_path=config_path,
+        test_type=test_type
     )
 
 @app.command()
@@ -79,13 +83,17 @@ def params_before_after(
         ),
         config_path: str = typer.Option(
             "config.json", help=""
+        ),
+        test_type: str = typer.Option(
+            "independent", help="pair or independent"
         )
 ):
     experiment_params_before_after(
         source_path=source_path,
         target_folder=target_folder,
         experiment=experiment,
-        config_path=config_path
+        config_path=config_path,
+        test_type=test_type
     )
 
 @app.command()

@@ -24,6 +24,7 @@ from app.core.use_cases.extract_personal_indicators import ExtractPersonalIndica
 from app.core.use_cases.feature_inspect import FeatureInspectUseCase
 from app.core.use_cases.normalize_data import NormalizeDataUseCase
 from app.core.use_cases.preprocess_data import PreprocessDataUseCase
+from app.infra.evaluators.pair_stat_evaluator import PairStatEvaluator
 from app.infra.evaluators.stat_evaluator import StatEvaluator
 from app.infra.filters.dataframe_column_filter import DataFrameColumnFilter
 from app.infra.providers.config_provider import ConfigProvider
@@ -203,6 +204,16 @@ class Container(containers.DeclarativeContainer):
         StatEvaluator
     )
 
+    pair_stat_evaluator = providers.Singleton(
+        PairStatEvaluator
+    )
+
+    chosen_stat_evaluator = providers.Selector(
+        config.TEST_TYPE,
+        paired=pair_stat_evaluator,
+        independent=stat_evaluator,
+    )
+
     config_provider = providers.Factory(
         ConfigProvider,
         source_path=config.CONFIG_PATH
@@ -210,12 +221,12 @@ class Container(containers.DeclarativeContainer):
 
     baseline_control_experiment_use_case = providers.Factory(
         BaselineControlExperimentUseCase,
-        stat_evaluator=stat_evaluator
+        stat_evaluator=chosen_stat_evaluator
     )
 
     before_after_experiment_use_case = providers.Factory(
         BeforeAfterExperimentUseCase,
-        stat_evaluator=stat_evaluator,
+        stat_evaluator=chosen_stat_evaluator,
         experiment_config=config_provider,
         hue_field=config.HUE_FIELD,
         grouping_fields=config.GROUPING_FIELDS,
@@ -232,7 +243,7 @@ class Container(containers.DeclarativeContainer):
 
     params_before_after_experiment_use_case = providers.Factory(
         ParamsBeforeAfterExperimentUseCase,
-        stat_evaluator=stat_evaluator,
+        stat_evaluator=chosen_stat_evaluator,
         experiment_config=config_provider,
         experiment_hue=config.HUE_PARAM
     )

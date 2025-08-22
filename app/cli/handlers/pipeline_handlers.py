@@ -129,7 +129,8 @@ def process_control_data(folder: str, column_names: list, column_indexes: list, 
         config_path="experiments/control-ba-3.json",
         hue_field=hue_field,
         effect_field=effect_field,
-        grouping_fields=grouping_fields
+        grouping_fields=grouping_fields,
+        test_type="paired"
     )
     print(".")
 
@@ -146,7 +147,8 @@ def process_control_data(folder: str, column_names: list, column_indexes: list, 
         config_path="experiments/control-ba-5.json",
         hue_field=hue_field,
         effect_field=effect_field,
-        grouping_fields=grouping_fields
+        grouping_fields=grouping_fields,
+        test_type="paired"
     )
     print(".")
 
@@ -199,7 +201,8 @@ def process_treatment_data(folder: str, column_names: list, column_indexes: list
         config_path="experiments/treatment-ba-3.json",
         hue_field=hue_field,
         effect_field=effect_field,
-        grouping_fields=grouping_fields
+        grouping_fields=grouping_fields,
+        test_type="paired"
     )
     print(".")
 
@@ -216,7 +219,8 @@ def process_treatment_data(folder: str, column_names: list, column_indexes: list
         config_path="experiments/treatment-ba-5.json",
         hue_field=hue_field,
         effect_field=effect_field,
-        grouping_fields=grouping_fields
+        grouping_fields=grouping_fields,
+        test_type="paired"
     )
     print(".")
 
@@ -349,4 +353,3 @@ def data_normalize_aggregate_personalize(
         anchor_col=anchor_col
     )
     print(".")
-

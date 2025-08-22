@@ -124,11 +124,11 @@ python main.py experiment before-after --source-path treatment_norm.json --targe
 python main.py experiment control-treatment --source-path delta_norm.json --target-folder=control-treatment/treatment-3 --experiment=3 --config-path=experiments/control-treatment-treatment-3.json
 python main.py experiment control-treatment --source-path=delta_norm.json --target-folder=control-treatment/treatment-5 --experiment=5 --config-path=experiments/control-treatment-treatment-5.json
 
-python main.py experiment params-before-after --source-path overall/control_data.json --target-folder=params-before-after/control-3 --experiment=3 --config-path=experiments/params-before-after-control-3.json
-python main.py experiment params-before-after --source-path overall/control_data.json --target-folder=params-before-after/control-5 --experiment=5 --config-path=experiments/params-before-after-control-5.json
+python main.py experiment params-before-after --source-path overall/control_data.json --target-folder=params-before-after/control-3 --experiment=3 --config-path=experiments/params-before-after-control-3.json --test-type=paired
+python main.py experiment params-before-after --source-path overall/control_data.json --target-folder=params-before-after/control-5 --experiment=5 --config-path=experiments/params-before-after-control-5.json --test-type=paired
 
-python main.py experiment params-before-after --source-path overall/treatment_data.json --target-folder=params-before-after/treatment-3 --experiment=3 --config-path=experiments/params-before-after-treatment-3.json
-python main.py experiment params-before-after --source-path overall/treatment_data.json --target-folder=params-before-after/treatment-5 --experiment=5 --config-path=experiments/params-before-after-treatment-5.json
+python main.py experiment params-before-after --source-path overall/treatment_data.json --target-folder=params-before-after/treatment-3 --experiment=3 --config-path=experiments/params-before-after-treatment-3.json --test-type=paired
+python main.py experiment params-before-after --source-path overall/treatment_data.json --target-folder=params-before-after/treatment-5 --experiment=5 --config-path=experiments/params-before-after-treatment-5.json --test-type=paired
 
 python main.py experiment params-delta-before-after --source-path overall/delta.json --target-folder=params-before-after/delta-3 --experiment=3 --config-path=experiments/params-before-after-delta-3.json
 python main.py experiment params-delta-before-after --source-path overall/delta.json --target-folder=params-before-after/delta-5 --experiment=5 --config-path=experiments/params-before-after-delta-5.json

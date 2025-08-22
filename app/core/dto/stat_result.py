@@ -1,20 +1,21 @@
 from dataclasses import dataclass
 from typing import Literal, Union, Optional
 
+from proto import Field
+
 from app.core.dto.stat_conclusion import StatConclusion
 
 
 @dataclass
 class StatResult:
-    method: Literal["t", "u"]
-    x_len: int
-    y_len: int
-    x_median: Union[float, str]
-    y_median: Union[float, str]
-    test_value: Union[float, str]
-    p_value: Optional[Union[float, str]]
-    cohen_d: Optional[Union[float, str]]
-    rank_biserial_r: Optional[Union[float, str]]
-    effect_size: Union[float, str]
-    relative_difference: Union[float, str]
-    conclusion: StatConclusion
+    method: Optional[Literal["t", "u"]] = None
+    x_len: int = 0
+    y_len: int = 0
+    x_median: Optional[float] = None
+    y_median: Optional[float] = None
+    test_value: Optional[float] = None
+    p_value: Optional[float] = None
+    effect_value: Optional[float] = None
+    effect_kind: Optional[str] = None
+    effect_size: Optional[float] = None
+    conclusion: Optional[StatConclusion]  = None

@@ -84,10 +84,15 @@ class UtilController:
                 filepath = os.path.join(full_path, filename)
                 with open(filepath, "r") as f:
                     data = json.load(f)
+
+                    conclusion = data.get("conclusion")
+                    if not isinstance(conclusion, dict):
+                        conclusion = {}
+
                     raw_row = {
                         "param": display_name,
                         **{k: v for k, v in data.items() if k != "conclusion"},
-                        **data.get("conclusion", {})
+                        **conclusion
                     }
                     row = {k: raw_row.get(k, None) for k in csv_fieldnames}
                     rows.append(row)
