@@ -29,10 +29,10 @@ class BaseStatEvaluator(StatEvaluatorContract):
     def evaluate(self, x: pd.Series, y: pd.Series, method: Optional[str] = None) -> StatResult:
         x, y = self.prepare_data(x, y)
         x_len, y_len = len(x), len(y)
-        print("^" * 100)
+        # print("^" * 100)
         if not (x_len > 4 and y_len > 4):
             return StatResult()
-        print("*" * 100)
+        # print("*" * 100)
         x_med = float(np.median(x))
         y_med = float(np.median(y))
         effect_size = y_med - x_med

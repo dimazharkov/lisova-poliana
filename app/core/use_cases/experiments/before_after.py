@@ -36,10 +36,11 @@ class BeforeAfterExperimentUseCase(ExperimentUseCaseContract):
         result_data.update(stats)
         result_figs.update(figs)
 
-        for grouping_field in self.grouping_fields:
-            stats, figs = self.run_grouping(data, grouping_field)
-            result_data.update(stats)
-            result_figs.update(figs)
+        if self.grouping_fields:
+            for grouping_field in self.grouping_fields:
+                stats, figs = self.run_grouping(data, grouping_field)
+                result_data.update(stats)
+                result_figs.update(figs)
 
         return ExperimentResultDTO(
             data=result_data,
@@ -58,9 +59,16 @@ class BeforeAfterExperimentUseCase(ExperimentUseCaseContract):
 
         stats[key] = asdict(self.stat_evaluator.evaluate(g0, g1))
 
+        df_plot = (
+            pd.concat([
+                g0.to_frame(name=self.effect_field).assign(**{self.hue_field: 0}),
+                g1.to_frame(name=self.effect_field).assign(**{self.hue_field: 1})
+            ])
+        )
+
         fig = plt.figure(figsize=(6, 4))
         sns.boxplot(
-            data=data,
+            data=df_plot,
             x=self.hue_field,
             y=self.effect_field,
             hue=self.hue_field,
@@ -77,6 +85,66 @@ class BeforeAfterExperimentUseCase(ExperimentUseCaseContract):
         return stats, figures
 
     def run_grouping(self, data: pd.DataFrame, grouping_field: str) -> tuple[dict, dict]:
+        stats, figures = {}, {}
+        config = self.experiment_config.groupings[grouping_field]
+
+        # 1) Готовим данные для графика и сразу считаем статистику
+        frames = []
+        for val in data[grouping_field].dropna().unique():
+            subset = data[data[grouping_field] == val]
+
+            g0 = self.prep_series(subset, hue_value=0)
+            g1 = self.prep_series(subset, hue_value=1)
+
+            # для статистики — используем ровно эти же серии
+            stats[f"{grouping_field}_{val}"] = asdict(self.stat_evaluator.evaluate(g0, g1))
+
+            # для графика — собираем cleaned long-данные
+            f0 = g0.to_frame(name=self.effect_field).assign(**{self.hue_field: 0, grouping_field: val})
+            f1 = g1.to_frame(name=self.effect_field).assign(**{self.hue_field: 1, grouping_field: val})
+            frames.extend([f0, f1])
+
+        df_plot = pd.concat(frames, ignore_index=True)
+        # на всякий случай убедимся в численном типе
+        df_plot[self.effect_field] = pd.to_numeric(df_plot[self.effect_field], errors="coerce")
+
+        # 2) Строим график по подготовленным данным
+        fig = plt.figure(figsize=(6, 4))
+        ax = sns.boxplot(
+            data=df_plot,
+            x=grouping_field,
+            y=self.effect_field,
+            hue=self.hue_field,
+            palette="Set2",
+            showfliers=False,
+            width=0.2
+        )
+        plt.title(f"{config.title}")
+        plt.xlabel("")
+        plt.ylabel(config.ylabel)
+        plt.xticks([0, 1], config.xticks)
+        legend = plt.legend()
+        legend.get_texts()[0].set_text(config.labels.before)
+        legend.get_texts()[1].set_text(config.labels.after)
+        plt.tight_layout()
+        figures[grouping_field] = fig
+        # plt.title(f"{config.title}")
+        # plt.xlabel("")
+        # plt.ylabel(config.ylabel)
+        #
+        # # если нужен свой текст на осях:
+        # # plt.xticks(range(len(config.xticks)), config.xticks)
+        #
+        # # аккуратно переименуем легенду
+        # handles, labels = ax.get_legend_handles_labels()
+        # if len(handles) >= 2:
+        #     ax.legend(handles, [config.labels.before, config.labels.after], title=self.hue_field)
+        # plt.tight_layout()
+        # figures[grouping_field] = fig
+
+        return stats, figures
+
+    def run_grouping_bu(self, data: pd.DataFrame, grouping_field: str) -> tuple[dict, dict]:
         stats, figures = {}, {}
         config = self.experiment_config.groupings[grouping_field]
 
@@ -117,6 +185,9 @@ class BeforeAfterExperimentUseCase(ExperimentUseCaseContract):
         """
         df = data[data[self.hue_field].astype(int) == hue_value].copy()
         df = df.dropna(subset=[self.effect_field])
+
+        # print(f"df={df.describe()}")
+        # print(f"hue_field={self.hue_field}, effect_field={self.effect_field}, index_fields={self.index_fields}")
 
         if not self.index_fields:
             # независимый сценарий — обычная серия без ключа

@@ -230,6 +230,7 @@ class Container(containers.DeclarativeContainer):
         experiment_config=config_provider,
         hue_field=config.HUE_FIELD,
         grouping_fields=config.GROUPING_FIELDS,
+        index_fields=config.INDEX_FIELDS,
         effect_field=config.EFFECT_FIELD
     )
 

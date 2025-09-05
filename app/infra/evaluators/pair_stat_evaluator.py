@@ -1,3 +1,4 @@
+import warnings
 from typing import Optional, Union
 
 import pandas as pd
@@ -8,6 +9,7 @@ from app.core.contracts.stat_evaluator_contract import StatEvaluatorContract
 from app.core.dto.stat_conclusion import StatConclusion
 from app.core.dto.stat_result import StatResult
 from app.infra.evaluators.base_stat_evaluator import BaseStatEvaluator, TestMethod, TestOutcome
+from app.utils.data_utils import aggregate_duplicates
 
 
 class PairStatEvaluator(BaseStatEvaluator):
@@ -30,15 +32,25 @@ class PairStatEvaluator(BaseStatEvaluator):
                 "PairStatEvaluator: ожидаются индексы-ключи пар (например, MultiIndex ['person','experiment'])."
             )
 
-        if x.index.has_duplicates or y.index.has_duplicates:
-            raise ValueError(
-                "PairStatEvaluator: найдены дубликаты ключей в индексе. "
-                "Схлопните дубликаты заранее (например, median/mean) или обеспечьте уникальность."
+        if x.index.has_duplicates:
+            dupes = x.index[x.index.duplicated()].unique().tolist()
+            warnings.warn(
+                f"PairStatEvaluator: найдены дубликаты ключей в индексе x: {dupes}"
             )
+            x = aggregate_duplicates(x, agg_func_name="mean")
+
+        if y.index.has_duplicates:
+            dupes = y.index[y.index.duplicated()].unique().tolist()
+            warnings.warn(
+                f"PairStatEvaluator: найдены дубликаты ключей в индексе y: {dupes}"
+            )
+            y = aggregate_duplicates(y, agg_func_name="mean")
 
         common = x.index.intersection(y.index)
         if len(common) == 0:
-            # вернуть пустые серии исходного dtype
+            warnings.warn(
+                f"PairStatEvaluator: нет общих индексов"
+            )
             return x.iloc[0:0], y.iloc[0:0]
 
         x_aligned = x.loc[common]

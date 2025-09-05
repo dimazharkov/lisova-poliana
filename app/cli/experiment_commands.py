@@ -38,14 +38,31 @@ def before_after(
         ),
         test_type: str = typer.Option(
             "independent", help=""
-        )
+        ),
+        hue_field: str = typer.Option(
+            "repeat", help=""
+        ),
+        effect_field: str = typer.Option(
+            "median_effect", help=""
+        ),
+        index_field: List[str] = typer.Option(
+            ["person"], help=""
+        ),
+        grouping_field: List[str] = typer.Option(
+            [], help=""
+        ),
+
 ):
     experiment_before_after(
         source_path=source_path,
         target_folder=target_folder,
         experiment=experiment,
         config_path=config_path,
-        test_type=test_type
+        test_type=test_type,
+        hue_field=hue_field,
+        effect_field=effect_field,
+        index_fields=index_field,
+        grouping_fields=grouping_field
     )
 
 @app.command()

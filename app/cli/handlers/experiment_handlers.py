@@ -28,7 +28,8 @@ def experiment_before_after(
         hue_field: str,
         effect_field: str = "median_effect",
         grouping_fields: Optional[list[str]] = None,
-        test_type: Literal["paired", "independent"] = "independent"
+        test_type: Literal["paired", "independent"] = "independent",
+        index_fields: Optional[list[str]] = None
 ):
     container = Container()
     container.config.SOURCE_PATHS.from_value(source_path)
@@ -37,6 +38,7 @@ def experiment_before_after(
     container.config.HUE_FIELD.from_value(hue_field)
     container.config.EFFECT_FIELD.from_value(effect_field)
     container.config.GROUPING_FIELDS.from_value(grouping_fields)
+    container.config.INDEX_FIELDS.from_value(index_fields)
     container.config.FILTERS.from_value(
         {
             "experiment": int(experiment)
