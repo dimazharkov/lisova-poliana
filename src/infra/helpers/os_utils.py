@@ -1,0 +1,60 @@
+import json
+from pathlib import Path
+
+import pandas as pd
+from matplotlib.figure import Figure
+
+from app.config import config
+
+class DataShapeError(ValueError):
+    pass
+
+def save_to_disc(
+        data: pd.DataFrame | dict,
+        file_path: str | Path,
+        root: Path | None = None,
+        indent: int = 4
+) -> None:
+    relative_path = Path(str(file_path).lstrip("/"))
+    root_path = root or config.static_path
+    full_file_path = root_path / relative_path
+
+    full_file_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if isinstance(data, pd.DataFrame):
+        data.to_json(full_file_path, orient="records", indent=indent, force_ascii=False)
+    else:
+        with open(full_file_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=indent)
+
+
+def save_plot_to_disc(fig: Figure, file_path: str | Path, dpi: int = 300) -> None:
+    relative_path = Path(file_path.lstrip("/"))
+    full_file_path = config.static_path / relative_path
+
+    full_file_path.parent.mkdir(parents=True, exist_ok=True)
+
+    fig.savefig(full_file_path, dpi=dpi)
+
+
+def load_from_disc(file_path: str | Path, root: Path | None = None) -> dict:
+    relative_path = Path(str(file_path).lstrip("/"))
+    root_path = root or config.static_path
+    full_file_path = root_path / relative_path
+
+    if not full_file_path.exists():
+        raise FileNotFoundError(f"Missing file: {full_file_path}")
+
+    with open(full_file_path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def load_df_from_disc(file_path: str | Path, root: Path | None = None) -> pd.DataFrame:
+    data = load_from_disc(file_path, root)
+    try:
+        return pd.DataFrame(data)
+    except (ValueError, TypeError) as e:
+        raise DataShapeError(
+            f"Invalid data shape for file: {file_path}! Try to load it as json instead."
+        ) from e
+
