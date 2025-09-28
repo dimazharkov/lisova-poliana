@@ -22,11 +22,14 @@ class PipelineValidator:
                 continue
 
             uc_schema = factory.Schema
-            try:
-                valid_schema = uc_schema(**step.step_schema)
-            except ValidationError:
-                errors.append(f"[{i}] use case {step.use_case} schema is invalid")
-                continue
+            if uc_schema:
+                try:
+                    valid_schema = uc_schema(**step.step_schema)
+                except ValidationError:
+                    errors.append(f"[{i}] use case {step.use_case} schema is invalid")
+                    continue
+            else:
+                valid_schema = None
 
             validated.append((step, factory, valid_schema))
 

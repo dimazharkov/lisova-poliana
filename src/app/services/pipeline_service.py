@@ -39,6 +39,6 @@ class PipelineService:
         for step, use_case, expects_input in pipeline:
             data = use_case.run(data) if expects_input else use_case.run()
             res_text = f"{step.name} [{step.use_case}]"
-            print(f"{res_text:.<60} ok")
+            print(f"{res_text:.<80} ok")
         return data
 

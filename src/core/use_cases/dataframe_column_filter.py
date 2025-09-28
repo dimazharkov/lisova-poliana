@@ -1,12 +1,30 @@
-import re
-from typing import Optional, List
+from typing import Optional, List, Union, Tuple, re
 
 import pandas as pd
 
-from app.core.contracts.dataframe_column_filter_contract import Name, Idx, DataFrameColumnFilterContract
+from src.core.contracts.use_case import DataUseCase
 
+Name = Union[str, Tuple[str, str]]
+Idx  = Union[int, Tuple[int, int]]
 
-class DataFrameColumnFilter(DataFrameColumnFilterContract):
+class DataFrameColumnFilterUC(DataUseCase):
+    """
+    Filters a dataset by column names and/or index positions.
+
+    columns:
+      - explicit names: "name", "h3", ...
+      - name ranges: ("h5", "h15") → columns h5..h15 (inclusive); textual prefix must match
+
+    indexes:
+      - positional indices: 0, 1, 3
+      - index ranges: (10, 20) → positions 10..20 (inclusive)
+
+    You may specify both columns and indexes at the same time; the result is the intersection
+    of those filters. If both lists are empty (or omitted), the dataset is returned unchanged.
+
+    keep=True  → keep only the selected columns/rows
+    keep=False → drop the selected columns/rows
+    """
     def __init__(
             self,
             columns: Optional[List[Name]] = None,
@@ -17,21 +35,7 @@ class DataFrameColumnFilter(DataFrameColumnFilterContract):
         self.indexes = indexes
         self.keep = keep
 
-    def filter(
-            self,
-            df: pd.DataFrame,
-    ) -> pd.DataFrame:
-        """
-        columns:
-          - имена: "name", "h3", ...
-          - диапазоны по именам: ("h5", "h15") -> h5..h15 (включительно), префикс должен совпадать
-        indexes:
-          - позиционные индексы: 0, 1, 3
-          - диапазоны по индексам: (10, 20) -> 10..20 (включительно)
-
-        keep=True  -> оставить только выбранные
-        keep=False -> удалить выбранные
-        """
+    def run(self, df: pd.DataFrame) -> pd.DataFrame:
         if not self.columns and not self.indexes:
             return df
 
@@ -53,24 +57,28 @@ class DataFrameColumnFilter(DataFrameColumnFilterContract):
         if not spec:
             return []
         out: List[str] = []
-        rx = re.compile(r"^([^\d]*)(\d+)$")  # префикс + числовой суффикс
+        rx = re.compile(r"^([^\d]*)(\d+)$")
         for item in spec:
             if isinstance(item, tuple) and len(item) == 2:
                 a, b = item
                 if not (isinstance(a, str) and isinstance(b, str)):
-                    raise ValueError("Диапазон по именам должен быть строками, например ('h5','h15').")
+                    raise ValueError("The name range must be strings, e.g. ('h5', 'h15').")
+
                 m1, m2 = rx.match(a), rx.match(b)
                 if not (m1 and m2):
-                    raise ValueError(f"Ожидалась пара вида ('h5','h15'), получено: {item}")
+                    raise ValueError(f"Expected a pair like ('h5', 'h15'); got: {item}")
+
                 if m1.group(1) != m2.group(1):
-                    raise ValueError(f"Префиксы должны совпадать: {a} vs {b}")
+                    raise ValueError(f"Prefixes must match: {a} vs {b}")
+
                 prefix = m1.group(1)
                 start, end = int(m1.group(2)), int(m2.group(2))
                 lo, hi = sorted((start, end))
                 out.extend([f"{prefix}{i}" for i in range(lo, hi + 1)])
             else:
                 if not isinstance(item, str):
-                    raise ValueError(f"Имя колонки должно быть строкой: {item!r}")
+                    raise ValueError(f"Column name must be a string: {item!r}")
+
                 out.append(item)
         return out
 
@@ -85,5 +93,6 @@ class DataFrameColumnFilter(DataFrameColumnFilterContract):
                 lo, hi = sorted(item)
                 out.extend(list(range(lo, hi + 1)))
             else:
-                raise ValueError(f"Неподдерживаемый формат индекса/диапазона: {item!r}")
+                raise ValueError(f"Unsupported index/range format: {item!r}")
+
         return out
