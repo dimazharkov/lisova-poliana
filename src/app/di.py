@@ -1,9 +1,15 @@
 from dependency_injector import providers
 from dependency_injector.providers import merge_dicts
 
+from src.app.factories.add_personal_data import AddPersonalDataFactory
+from src.app.factories.add_personal_indicators import AddPersonalIndicatorsFactory
 from src.app.factories.clear_extracted_data import ClearExtractedDataFactory
 from src.app.factories.extract_data_from_raw import ExtractDataFromRawFactory
 from src.app.factories.setup_repeat_and_treatment import SetupRepeatAndTreatmentFactory
+from src.app.resources.indicators_data import IndicatorsData
+from src.app.resources.person_data import PersonData
+from src.app.use_cases.add_personal_data import AddPersonalDataUC
+from src.app.use_cases.add_personal_indicators import AddPersonalIndicatorsUC
 from src.app.use_cases.clear_extracted_data import ClearExtractedDataUC
 from src.app.use_cases.extract_data_from_raw import ExtractDataFromRawUC
 from src.app.use_cases.setup_repeat_and_treatment import SetupRepeatAndTreatmentUC
@@ -14,6 +20,8 @@ uc_registry = {
     "extract_data_from_raw": ExtractDataFromRawFactory,
     "clear_extracted_data": ClearExtractedDataFactory,
     "setup_repeat_and_treatment": SetupRepeatAndTreatmentFactory,
+    "add_personal_data": AddPersonalDataFactory,
+    "add_personal_indicators": AddPersonalIndicatorsFactory,
     # "write_data_to_disc": WriteDataToDiscFactory,
 }
 
@@ -44,4 +52,28 @@ class AppContainer(Container):
     setup_repeat_and_treatment_uc = providers.Factory(
         SetupRepeatAndTreatmentUC,
         treatment=config.treatment
+    )
+
+    person_repo = providers.Factory(
+        PersonData,
+        source_path=config.meta_path
+    )
+
+    add_personal_data_uc = providers.Factory(
+        AddPersonalDataUC,
+        personal_repo=person_repo,
+        merge_column=config.merge_column,
+        anchor_column=config.anchor_column
+    )
+
+    indicators_repo = providers.Factory(
+        IndicatorsData,
+        source_path=config.meta_path
+    )
+
+    add_personal_indicators_uc = providers.Factory(
+        AddPersonalIndicatorsUC,
+        indicators_repo=indicators_repo,
+        merge_column=config.merge_column,
+        anchor_column=config.anchor_column
     )

@@ -1,11 +1,13 @@
 from dependency_injector import containers, providers
 
+from src.core.use_cases.aggregate_data import AggregateDataUC
 from src.core.use_cases.dataframe_column_filter import DataFrameColumnFilterUC
 from src.core.use_cases.normalize_data import NormalizeDataUC
 from src.core.use_cases.read_data_from_disc import ReadDataFromDiscUC
 from src.core.use_cases.read_json_from_disc import ReadJsonFromDiscUC
 from src.core.use_cases.write_data_to_disc import WriteDataToDiscUC
 from src.core.use_cases.write_json_to_disc import WriteJsonToDiscUC
+from src.infra.factories.aggregate_data import AggregateDataFactory
 from src.infra.factories.dataframe_column_filter import DataFrameColumnFilterFactory
 from src.infra.factories.normalize_data import NormalizeDataFactory
 from src.infra.factories.read_data_from_disc import ReadDataFromDiscFactory
@@ -81,6 +83,13 @@ class Container(containers.DeclarativeContainer):
         scallers=config.scalers
     )
 
+    aggregate_data_uc = providers.Factory(
+        AggregateDataUC,
+        column_filter=column_list_filter,
+        agg_method=config.agg_method,
+        agg_field=config.agg_field
+    )
+
     uc_registry = providers.Object({
         "read_data_from_disc": ReadDataFromDiscFactory,
         "read_json_from_disc": ReadJsonFromDiscFactory,
@@ -88,4 +97,5 @@ class Container(containers.DeclarativeContainer):
         "write_json_to_disc": WriteJsonToDiscFactory,
         "dataframe_column_filter":  DataFrameColumnFilterFactory,
         "normalize_data": NormalizeDataFactory,
+        "aggregate_data": AggregateDataFactory,
     })

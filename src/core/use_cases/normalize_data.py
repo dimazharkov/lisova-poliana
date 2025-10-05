@@ -57,7 +57,7 @@ class NormalizeDataUC(DataUseCase):
             scaler = self._make_scaler(name)
             x = scaler.fit_transform(x)
 
-        # 5) записываем назад через DataFrame — без предупреждений о несовместимых dtypes
+        # 5) записываем назад через DataFrame
         df.loc[:, cols_to_scale] = pd.DataFrame(x, index=df.index, columns=cols_to_scale)
 
         # колонки, где все NaN, остаются без изменений
