@@ -1,12 +1,12 @@
 import pandas as pd
 from sklearn.preprocessing import RobustScaler, MinMaxScaler, StandardScaler, MaxAbsScaler, QuantileTransformer
 
-from src.core.contracts.column_list_filter import ColumnListFilter
+from src.core.contracts.filter import StringListFilterContract
 from src.core.contracts.use_case import DataUseCase
 
 
 class NormalizeDataUC(DataUseCase):
-    def __init__(self, column_filter: ColumnListFilter, scallers: list[str] | None = None):
+    def __init__(self, column_filter: StringListFilterContract, scallers: list[str] | None = None):
         self.column_filter = column_filter
         self.scallers: list[str] = scallers or ["robust", "minmax"]
 

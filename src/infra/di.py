@@ -5,17 +5,23 @@ from src.core.use_cases.dataframe_column_filter import DataFrameColumnFilterUC
 from src.core.use_cases.normalize_data import NormalizeDataUC
 from src.core.use_cases.read_data_from_disc import ReadDataFromDiscUC
 from src.core.use_cases.read_json_from_disc import ReadJsonFromDiscUC
+from src.core.use_cases.two_sample_analysis import TwoSampleAnalysisUC
 from src.core.use_cases.write_data_to_disc import WriteDataToDiscUC
 from src.core.use_cases.write_json_to_disc import WriteJsonToDiscUC
+from src.infra.calculators.stat.independent_stat_calculator import IndependentStatCalculator
+from src.infra.calculators.stat.pairwise_stat_calculator import PairwiseStatCalculator
 from src.infra.factories.aggregate_data import AggregateDataFactory
 from src.infra.factories.dataframe_column_filter import DataFrameColumnFilterFactory
 from src.infra.factories.normalize_data import NormalizeDataFactory
 from src.infra.factories.read_data_from_disc import ReadDataFromDiscFactory
 from src.infra.factories.read_json_from_disc import ReadJsonFromDiscFactory
+from src.infra.factories.two_sample_analysis import TwoSampleAnalysisFactory
 from src.infra.factories.write_data_to_disc import WriteDataToDiscFactory
 from src.infra.factories.write_json_to_disc import WriteJsonToDiscFactory
 from src.infra.filters.column_list_filter import ColumnListFilter
+from src.infra.filters.data_frame_filter import DataFrameFilter
 from src.infra.repositories.data_file_repository import DataFileRepository
+from src.infra.repositories.experiment_repository import ExperimentRepository
 from src.infra.repositories.json_file_repository import JsonFileRepository
 from src.infra.validators.pipeline_validator import PipelineValidator
 
@@ -90,6 +96,43 @@ class Container(containers.DeclarativeContainer):
         agg_field=config.agg_field
     )
 
+    independent_stat_calculator = providers.Singleton(
+        IndependentStatCalculator
+    )
+
+    pairwise_stat_calculator = providers.Singleton(
+        PairwiseStatCalculator
+    )
+
+    chosen_stat_calculator = providers.Selector(
+        config.test_type,
+        paired=pairwise_stat_calculator,
+        independent=independent_stat_calculator,
+    )
+
+    df_filter = providers.Factory(
+        DataFrameFilter,
+        filter_config=config.data_filter
+    )
+
+    experiment_repository = providers.Factory(
+        ExperimentRepository,
+        target_folder=config.target_folder
+    )
+
+    two_sample_analysis_uc = providers.Factory(
+        TwoSampleAnalysisUC,
+        stat_calculator=chosen_stat_calculator,
+        df_filter=df_filter,
+        repository=experiment_repository,
+        hue_field=config.hue_field,
+        effect_field=config.effect_field,
+        stratify_fields=config.stratify_fields,
+        index_fields=config.index_fields,
+        experiment_config=config.experiment_config,
+        test_method=config.test_method
+    )
+
     uc_registry = providers.Object({
         "read_data_from_disc": ReadDataFromDiscFactory,
         "read_json_from_disc": ReadJsonFromDiscFactory,
@@ -98,4 +141,5 @@ class Container(containers.DeclarativeContainer):
         "dataframe_column_filter":  DataFrameColumnFilterFactory,
         "normalize_data": NormalizeDataFactory,
         "aggregate_data": AggregateDataFactory,
+        "two_sample_analysis": TwoSampleAnalysisFactory
     })

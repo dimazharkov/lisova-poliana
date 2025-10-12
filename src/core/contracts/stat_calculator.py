@@ -25,6 +25,6 @@ class StatResult:
     conclusion: Optional[StatConclusion]  = None
 
 
-class StatCalculator:
+class StatCalculatorContract:
     @staticmethod
-    def evaluate(x: pd.Series, y: pd.Series, method: Optional[str] = None) -> StatResult: ...
+    def calculate(x: pd.Series, y: pd.Series, method: Optional[str] = None) -> StatResult: ...

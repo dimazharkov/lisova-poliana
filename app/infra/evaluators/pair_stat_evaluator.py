@@ -5,9 +5,6 @@ import pandas as pd
 import numpy as np
 from scipy import stats
 
-from app.core.contracts.stat_evaluator_contract import StatEvaluatorContract
-from app.core.dto.stat_conclusion import StatConclusion
-from app.core.dto.stat_result import StatResult
 from app.infra.evaluators.base_stat_evaluator import BaseStatEvaluator, TestMethod, TestOutcome
 from app.utils.data_utils import aggregate_duplicates
 

@@ -4,7 +4,7 @@ from typing import Optional, Literal
 import numpy as np
 import pandas as pd
 
-from src.core.contracts.stat_calculator import StatCalculator, StatResult, StatConclusion
+from src.core.contracts.stat_calculator import StatCalculatorContract, StatResult, StatConclusion
 
 EffectKind = Optional[Literal["cohen_d", "rank_biserial_r", "hedges_g"]]
 TestMethod = Literal["t", "u"]
@@ -19,17 +19,17 @@ class TestOutcome:
 def round_or_none(v: Optional[float], digits: int = 4) -> Optional[float]:
     return round(float(v), digits) if isinstance(v, (float, np.floating)) and np.isfinite(v) else None
 
-class BaseStatCalculator(StatCalculator):
+class BaseStatCalculator(StatCalculatorContract):
     def __init__(self):
         self.min_p_value = 1e-4
 
-    def evaluate(self, x: pd.Series, y: pd.Series, method: Optional[str] = None) -> StatResult:
+    def calculate(self, x: pd.Series, y: pd.Series, method: Optional[str] = None) -> StatResult:
         x, y = self.prepare_data(x, y)
         x_len, y_len = len(x), len(y)
-        # print("^" * 100)
-        if not (x_len > 4 and y_len > 4):
+
+        if not (x_len >= 4 and y_len >= 4):
             return StatResult()
-        # print("*" * 100)
+
         x_med = float(np.median(x))
         y_med = float(np.median(y))
         effect_size = y_med - x_med

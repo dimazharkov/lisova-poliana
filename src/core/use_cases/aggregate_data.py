@@ -1,12 +1,12 @@
 import numpy as np
 import pandas as pd
 
-from src.core.contracts.column_list_filter import ColumnListFilter
+from src.core.contracts.filter import StringListFilterContract
 from src.core.contracts.use_case import DataUseCase
 
 
 class AggregateDataUC(DataUseCase):
-    def __init__(self, column_filter: ColumnListFilter, agg_method: str = "median", agg_field: str = "median_effect"):
+    def __init__(self, column_filter: StringListFilterContract, agg_method: str = "median", agg_field: str = "median_effect"):
         self.column_filter = column_filter
         self.agg_method = agg_method
         self.agg_field = agg_field

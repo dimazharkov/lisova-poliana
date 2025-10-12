@@ -1,7 +1,8 @@
 from typing import Optional
 
+import numpy as np
 import pandas as pd
-from scipy.stats import stats
+from scipy import stats
 
 from src.infra.calculators.stat.base_stat_calculator import BaseStatCalculator, TestMethod, TestOutcome
 
@@ -105,8 +106,8 @@ class IndependentStatCalculator(BaseStatCalculator):
         d = (x.mean() - y.mean()) / pooled_std
 
         # Поправка Hedges’ J
-        J = 1.0 - 3.0 / (4.0 * df - 1.0) if df > 1 else 1.0
-        return float(d) * J
+        j = 1.0 - 3.0 / (4.0 * df - 1.0) if df > 1 else 1.0
+        return float(d) * j
 
     def calc_rank_biserial_signed(self, x: pd.Series, y: pd.Series) -> Optional[float]:
         """
@@ -131,5 +132,5 @@ class IndependentStatCalculator(BaseStatCalculator):
         n, m = len(x), len(y)
         if n == 0 or m == 0:
             return None
-        U_greater = float(stats.mannwhitneyu(x, y, alternative="greater", method="auto").statistic)
-        return 2.0 * (U_greater / (n * m)) - 1.0
+        u_greater = float(stats.mannwhitneyu(x, y, alternative="greater", method="auto").statistic)
+        return 2.0 * (u_greater / (n * m)) - 1.0

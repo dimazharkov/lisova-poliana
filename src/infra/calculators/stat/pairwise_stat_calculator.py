@@ -3,7 +3,7 @@ from typing import Optional
 
 import numpy as np
 import pandas as pd
-from scipy.stats import stats
+from scipy import stats
 
 from src.infra.calculators.stat.base_stat_calculator import BaseStatCalculator, TestMethod, TestOutcome
 from src.infra.helpers.data_utils import aggregate_duplicates
@@ -22,27 +22,27 @@ class PairwiseStatCalculator(BaseStatCalculator):
         # защита от случайного RangeIndex: без ключа пара не определена
         if isinstance(x.index, pd.RangeIndex) or isinstance(y.index, pd.RangeIndex):
             raise ValueError(
-                "PairStatEvaluator: ожидаются индексы-ключи пар (например, MultiIndex ['person','experiment'])."
+                "PairwiseStatCalculator: ожидаются индексы-ключи пар (например, MultiIndex ['person','experiment'])."
             )
 
         if x.index.has_duplicates:
             dupes = x.index[x.index.duplicated()].unique().tolist()
             warnings.warn(
-                f"PairStatEvaluator: найдены дубликаты ключей в индексе x: {dupes}"
+                f"PairwiseStatCalculator: найдены дубликаты ключей в индексе x: {dupes}"
             )
             x = aggregate_duplicates(x, agg_func_name="mean")
 
         if y.index.has_duplicates:
             dupes = y.index[y.index.duplicated()].unique().tolist()
             warnings.warn(
-                f"PairStatEvaluator: найдены дубликаты ключей в индексе y: {dupes}"
+                f"PairwiseStatCalculator: найдены дубликаты ключей в индексе y: {dupes}"
             )
             y = aggregate_duplicates(y, agg_func_name="mean")
 
         common = x.index.intersection(y.index)
         if len(common) == 0:
             warnings.warn(
-                f"PairStatEvaluator: нет общих индексов"
+                f"PairwiseStatCalculator: нет общих индексов"
             )
             return x.iloc[0:0], y.iloc[0:0]
 
@@ -115,8 +115,8 @@ class PairwiseStatCalculator(BaseStatCalculator):
         dz = mean_d / sd
         # Hedges’ correction для зависимых: df = n - 1
         df = n - 1
-        J = 1.0 - 3.0 / (4.0 * df - 1.0) if df > 1 else 1.0
-        gz = float(dz) * J
+        j = 1.0 - 3.0 / (4.0 * df - 1.0) if df > 1 else 1.0
+        gz = float(dz) * j
         return gz
 
     def calc_rank_biserial_signed(self, x: pd.Series, y: pd.Series) -> Optional[float]:

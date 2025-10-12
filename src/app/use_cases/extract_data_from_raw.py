@@ -2,12 +2,12 @@ from typing import Any
 
 import pandas as pd
 
-from src.core.contracts.file_repository import FileRepository
+from src.core.contracts.repository import DataFileRepositoryContract
 from src.core.contracts.use_case import DataUseCase
 
 
 class ExtractDataFromRawUC(DataUseCase):
-    def __init__(self, param_repo: FileRepository, data_section: str):
+    def __init__(self, param_repo: DataFileRepositoryContract, data_section: str):
         self.param_repo = param_repo
         self.data_section = data_section
 

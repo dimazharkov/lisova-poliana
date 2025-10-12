@@ -1,11 +1,11 @@
 from typing import Any
 
-from src.core.contracts.file_repository import FileRepository
+from src.core.contracts.repository import JsonFileRepositoryContract
 from src.core.contracts.use_case import NoInputUseCase
 
 
 class ReadJsonFromDiscUC(NoInputUseCase):
-    def __init__(self, data_repo: FileRepository):
+    def __init__(self, data_repo: JsonFileRepositoryContract):
         self.data_repo = data_repo
 
     def run(self) -> Any:

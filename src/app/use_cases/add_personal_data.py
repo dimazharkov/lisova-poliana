@@ -1,11 +1,11 @@
 import pandas as pd
 
-from src.core.contracts.file_repository import FileRepository
+from src.core.contracts.repository import DataFileRepositoryContract
 from src.core.contracts.use_case import DataUseCase
 
 
 class AddPersonalDataUC(DataUseCase):
-    def __init__(self, personal_repo: FileRepository, merge_column: str = "person", anchor_column: str = "h1"):
+    def __init__(self, personal_repo: DataFileRepositoryContract, merge_column: str = "person", anchor_column: str = "h1"):
         self.metadata = personal_repo.read()
         self.merge_col = merge_column
         self.anchor_col = anchor_column

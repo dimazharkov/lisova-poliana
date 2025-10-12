@@ -1,10 +1,10 @@
 import re
 from typing import List, Optional
 
-from app.infra.filters.column_list_filter import ColumnListFilter as ColumnListFilterContract
+from src.core.contracts.filter import StringListFilterContract
 
 
-class ColumnListFilter(ColumnListFilterContract):
+class ColumnListFilter(StringListFilterContract):
     r"""
     Filters a list of column names using regex-based includes and explicit excludes.
 
