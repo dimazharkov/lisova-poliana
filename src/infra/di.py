@@ -1,6 +1,8 @@
 from dependency_injector import containers, providers
 
 from src.core.use_cases.aggregate_data import AggregateDataUC
+from src.core.use_cases.calc_delta import CalcDeltaUC
+from src.core.use_cases.combine_datasets import CombineDatasetsUC
 from src.core.use_cases.dataframe_column_filter import DataFrameColumnFilterUC
 from src.core.use_cases.normalize_data import NormalizeDataUC
 from src.core.use_cases.read_data_from_disc import ReadDataFromDiscUC
@@ -11,6 +13,8 @@ from src.core.use_cases.write_json_to_disc import WriteJsonToDiscUC
 from src.infra.calculators.stat.independent_stat_calculator import IndependentStatCalculator
 from src.infra.calculators.stat.pairwise_stat_calculator import PairwiseStatCalculator
 from src.infra.factories.aggregate_data import AggregateDataFactory
+from src.infra.factories.calc_delta import CalcDeltaFactory
+from src.infra.factories.combine_datasets import CombineDatasetsFactory
 from src.infra.factories.dataframe_column_filter import DataFrameColumnFilterFactory
 from src.infra.factories.normalize_data import NormalizeDataFactory
 from src.infra.factories.read_data_from_disc import ReadDataFromDiscFactory
@@ -133,6 +137,22 @@ class Container(containers.DeclarativeContainer):
         test_method=config.test_method
     )
 
+    calc_delta_uc = providers.Factory(
+        CalcDeltaUC,
+        method=config.method,
+        group_cols=config.group_cols,
+        sort_col=config.sort_col,
+        service_cols=config.service_cols
+    )
+
+    combine_datasets_uc = providers.Factory(
+        CombineDatasetsUC,
+        how=config.how,
+        enforce_same_dtypes=config.enforce_same_dtypes,
+        add_source_col=config.add_source_col,
+        fill_value=config.fill_value
+    )
+
     uc_registry = providers.Object({
         "read_data_from_disc": ReadDataFromDiscFactory,
         "read_json_from_disc": ReadJsonFromDiscFactory,
@@ -141,5 +161,7 @@ class Container(containers.DeclarativeContainer):
         "dataframe_column_filter":  DataFrameColumnFilterFactory,
         "normalize_data": NormalizeDataFactory,
         "aggregate_data": AggregateDataFactory,
-        "two_sample_analysis": TwoSampleAnalysisFactory
+        "two_sample_analysis": TwoSampleAnalysisFactory,
+        "calc_delta": CalcDeltaFactory,
+        "combine_datasets": CombineDatasetsFactory
     })

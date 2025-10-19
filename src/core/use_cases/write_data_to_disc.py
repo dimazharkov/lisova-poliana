@@ -9,5 +9,5 @@ class WriteDataToDiscUC(DataUseCase):
         self.data_repo = data_repo
 
     def run(self, data: Any) -> Any:
-        data = self.data_repo.write(data)
+        self.data_repo.write(data)
         return data
