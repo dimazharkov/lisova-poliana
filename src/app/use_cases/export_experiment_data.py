@@ -2,8 +2,8 @@ import csv
 import json
 import os
 
-from app.config import config
-from app.core.contracts.config_provider_contract import ConfigProviderContract
+from src.config import config
+from src.core.contracts.config_provider import ConfigProviderContract
 from src.core.contracts.use_case import NoInputUseCase
 
 csv_fieldnames = {

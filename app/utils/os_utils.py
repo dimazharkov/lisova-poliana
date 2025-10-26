@@ -4,7 +4,7 @@ from pathlib import Path
 import pandas as pd
 from matplotlib.figure import Figure
 
-from app.config import config
+from src.config import config
 
 
 def save_to_disc(

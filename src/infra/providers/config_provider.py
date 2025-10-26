@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Optional, Any, Union
 
-from app.config import config
+from src.config import config
 from src.core.contracts.config_provider import ConfigProviderContract
 from src.infra.helpers.os_utils import load_from_disc, save_to_disc
 

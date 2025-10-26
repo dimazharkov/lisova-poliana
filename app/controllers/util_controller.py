@@ -2,7 +2,7 @@ import csv
 import json
 import os
 
-from app.config import config
+from src.config import config
 from app.core.contracts.config_provider_contract import ConfigProviderContract
 
 csv_fieldnames = [

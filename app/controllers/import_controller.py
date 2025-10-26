@@ -1,4 +1,4 @@
-from app.config import config
+from src.config import config
 import gspread
 from gspread import Spreadsheet
 from google.oauth2.service_account import Credentials
