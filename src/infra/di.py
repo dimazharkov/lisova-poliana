@@ -1,5 +1,7 @@
 from dependency_injector import containers, providers
 
+from app.core.use_cases.add_personal_data import AddPersonalDataUseCase
+from src.core.use_cases.add_columns import AddColumnsUC
 from src.core.use_cases.aggregate_data import AggregateDataUC
 from src.core.use_cases.calc_delta import CalcDeltaUC
 from src.core.use_cases.combine_datasets import CombineDatasetsUC
@@ -12,6 +14,7 @@ from src.core.use_cases.write_data_to_disc import WriteDataToDiscUC
 from src.core.use_cases.write_json_to_disc import WriteJsonToDiscUC
 from src.infra.calculators.stat.independent_stat_calculator import IndependentStatCalculator
 from src.infra.calculators.stat.pairwise_stat_calculator import PairwiseStatCalculator
+from src.infra.factories.add_columns import AddColumnsFactory
 from src.infra.factories.aggregate_data import AggregateDataFactory
 from src.infra.factories.calc_delta import CalcDeltaFactory
 from src.infra.factories.combine_datasets import CombineDatasetsFactory
@@ -27,6 +30,7 @@ from src.infra.filters.data_frame_filter import DataFrameFilter
 from src.infra.repositories.data_file_repository import DataFileRepository
 from src.infra.repositories.experiment_repository import ExperimentRepository
 from src.infra.repositories.json_file_repository import JsonFileRepository
+from src.infra.schemas.add_columns import AddColumnsSchema
 from src.infra.validators.pipeline_validator import PipelineValidator
 
 
@@ -153,6 +157,12 @@ class Container(containers.DeclarativeContainer):
         fill_value=config.fill_value
     )
 
+    add_columns_uc = providers.Factory(
+        AddColumnsUC,
+        loc=config.loc,
+        columns=config.columns
+    )
+
     uc_registry = providers.Object({
         "read_data_from_disc": ReadDataFromDiscFactory,
         "read_json_from_disc": ReadJsonFromDiscFactory,
@@ -163,5 +173,6 @@ class Container(containers.DeclarativeContainer):
         "aggregate_data": AggregateDataFactory,
         "two_sample_analysis": TwoSampleAnalysisFactory,
         "calc_delta": CalcDeltaFactory,
-        "combine_datasets": CombineDatasetsFactory
+        "combine_datasets": CombineDatasetsFactory,
+        "add_columns": AddColumnsFactory
     })

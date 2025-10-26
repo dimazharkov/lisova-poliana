@@ -4,6 +4,7 @@ from dependency_injector.providers import merge_dicts
 from src.app.factories.add_personal_data import AddPersonalDataFactory
 from src.app.factories.add_personal_indicators import AddPersonalIndicatorsFactory
 from src.app.factories.clear_extracted_data import ClearExtractedDataFactory
+from src.app.factories.export_experiment_data import ExportExperimentDataFactory
 from src.app.factories.extract_data_from_raw import ExtractDataFromRawFactory
 from src.app.factories.setup_repeat_and_treatment import SetupRepeatAndTreatmentFactory
 from src.app.resources.indicators_data import IndicatorsData
@@ -11,9 +12,11 @@ from src.app.resources.person_data import PersonData
 from src.app.use_cases.add_personal_data import AddPersonalDataUC
 from src.app.use_cases.add_personal_indicators import AddPersonalIndicatorsUC
 from src.app.use_cases.clear_extracted_data import ClearExtractedDataUC
+from src.app.use_cases.export_experiment_data import ExportExperimentDataUC
 from src.app.use_cases.extract_data_from_raw import ExtractDataFromRawUC
 from src.app.use_cases.setup_repeat_and_treatment import SetupRepeatAndTreatmentUC
 from src.infra.di import Container
+from src.infra.providers.config_provider import ConfigProvider
 from src.infra.repositories.json_file_repository import JsonFileRepository
 
 uc_registry = {
@@ -22,7 +25,7 @@ uc_registry = {
     "setup_repeat_and_treatment": SetupRepeatAndTreatmentFactory,
     "add_personal_data": AddPersonalDataFactory,
     "add_personal_indicators": AddPersonalIndicatorsFactory,
-    # "write_data_to_disc": WriteDataToDiscFactory,
+    "export_experiment_data": ExportExperimentDataFactory,
 }
 
 class AppContainer(Container):
@@ -77,3 +80,17 @@ class AppContainer(Container):
         merge_column=config.merge_column,
         anchor_column=config.anchor_column
     )
+
+    config_provider = providers.Factory(
+        ConfigProvider,
+        source_path=config.config_path
+    )
+
+    export_experiment_data_uc = providers.Factory(
+        ExportExperimentDataUC,
+        source_path=config.source_path,
+        target_path=config.target_path,
+        provider=config_provider
+    )
+
+
