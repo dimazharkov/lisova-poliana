@@ -6,6 +6,7 @@ from src.core.use_cases.aggregate_data import AggregateDataUC
 from src.core.use_cases.calc_delta import CalcDeltaUC
 from src.core.use_cases.combine_datasets import CombineDatasetsUC
 from src.core.use_cases.dataframe_column_filter import DataFrameColumnFilterUC
+from src.core.use_cases.dataframe_data_filter import DataFrameDataFilterUC
 from src.core.use_cases.normalize_data import NormalizeDataUC
 from src.core.use_cases.read_data_from_disc import ReadDataFromDiscUC
 from src.core.use_cases.read_json_from_disc import ReadJsonFromDiscUC
@@ -19,6 +20,7 @@ from src.infra.factories.aggregate_data import AggregateDataFactory
 from src.infra.factories.calc_delta import CalcDeltaFactory
 from src.infra.factories.combine_datasets import CombineDatasetsFactory
 from src.infra.factories.dataframe_column_filter import DataFrameColumnFilterFactory
+from src.infra.factories.dataframe_data_filter import DataFrameDataFilterFactory
 from src.infra.factories.normalize_data import NormalizeDataFactory
 from src.infra.factories.read_data_from_disc import ReadDataFromDiscFactory
 from src.infra.factories.read_json_from_disc import ReadJsonFromDiscFactory
@@ -82,7 +84,7 @@ class Container(containers.DeclarativeContainer):
         DataFrameColumnFilterUC,
         columns=config.columns,
         indexes=config.indexes,
-        keep=config.keep_columns
+        keep=config.keep
     )
 
     column_list_filter = providers.Factory(
@@ -120,7 +122,7 @@ class Container(containers.DeclarativeContainer):
 
     df_filter = providers.Factory(
         DataFrameFilter,
-        filter_config=config.data_filter
+        filter_config=config.filter_config
     )
 
     experiment_repository = providers.Factory(
@@ -163,12 +165,18 @@ class Container(containers.DeclarativeContainer):
         columns=config.columns
     )
 
+    dataframe_data_filter_uc = providers.Factory(
+        DataFrameDataFilterUC,
+        df_filter=df_filter
+    )
+
     uc_registry = providers.Object({
         "read_data_from_disc": ReadDataFromDiscFactory,
         "read_json_from_disc": ReadJsonFromDiscFactory,
         "write_data_to_disc": WriteDataToDiscFactory,
         "write_json_to_disc": WriteJsonToDiscFactory,
         "dataframe_column_filter":  DataFrameColumnFilterFactory,
+        "dataframe_data_filter": DataFrameDataFilterFactory,
         "normalize_data": NormalizeDataFactory,
         "aggregate_data": AggregateDataFactory,
         "two_sample_analysis": TwoSampleAnalysisFactory,

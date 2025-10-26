@@ -32,20 +32,20 @@ class DataFrameFilter(DataFrameFilterContract):
     def __init__(self, filter_config: Mapping[str, Any]) -> None:
         self.filter_config = dict(filter_config or {})
 
-    def filter(self, df: pd.DataFrame) -> pd.DataFrame:
+    def filter(self, data: pd.DataFrame) -> pd.DataFrame:
         # print("type(df) = ", type(df))
         if not self.filter_config:
-            return df  # nothing to filter
+            return data  # nothing to filter
 
-        mask = pd.Series(True, index=df.index)
+        mask = pd.Series(True, index=data.index)
         for col, rule in self.filter_config.items():
-            if col not in df.columns:
+            if col not in data.columns:
                 raise KeyError(f"Column not found: {col!r}")
 
-            col_mask = self._make_mask(df[col], rule)
+            col_mask = self._make_mask(data[col], rule)
             mask &= col_mask
 
-        return df.loc[mask]
+        return data.loc[mask]
 
     def _make_mask(self, s: pd.Series, rule: Any) -> pd.Series:
         # scalar None → select NaNs

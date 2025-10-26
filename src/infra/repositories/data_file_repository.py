@@ -24,10 +24,14 @@ class DataFileRepository(DataFileRepositoryContract):
     ):
         self._source_paths = self._normalize_paths(source_path)
         self._target_paths = self._normalize_paths(target_path)
-        self.data: Optional[DFOrList] = self._load_from_paths(self._source_paths)
+        self.data: Optional[DFOrList] = None
 
     def read(self) -> Optional[DFOrList]:
-        return self.data
+        self.data = self._load_from_paths(self._source_paths)
+        return self._prep_data(self.data)
+
+    def _prep_data(self, data: DFOrList) -> DFOrList:
+        return data
 
     def write(self, data: DFOrList) -> None:
         if self._target_paths is None:

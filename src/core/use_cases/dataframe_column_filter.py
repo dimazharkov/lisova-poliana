@@ -1,11 +1,12 @@
+import re
 from typing import Optional, List, Union, Tuple
 
 import pandas as pd
 
 from src.core.contracts.use_case import DataUseCase
 
-Name = Union[str, Tuple[str, str]]
-Idx  = Union[int, Tuple[int, int]]
+Name = Union[str, Tuple[str, str], List[str]]
+Idx  = Union[int, Tuple[int, int], List[int]]
 
 class DataFrameColumnFilterUC(DataUseCase):
     """
@@ -40,18 +41,27 @@ class DataFrameColumnFilterUC(DataUseCase):
             return df
 
         df = df.copy()
-        names = set(self.expand_name_ranges(self.columns)) & set(df.columns)
-        idx_names = {df.columns[i] for i in self.expand_index_ranges(self.indexes)}
-        selected = names | idx_names
+
+        # имена из columns, отфильтрованные по реально существующим
+        names = set(self.expand_name_ranges(self.columns)) & set(map(str, df.columns))
+
+        # имена по позициям колонок (а НЕ строк!)
+        idxs = self.expand_index_ranges(self.indexes)
+        idxs = [i for i in idxs if 0 <= i < len(df.columns)]  # безопасная обрезка
+        idx_names = {str(df.columns[i]) for i in idxs}
+
+        # логика пересечения/объединения согласно докстрингу
+        if self.columns and self.indexes:
+            selected = names | idx_names
+        else:
+            selected = names or idx_names
 
         if self.keep:
-            result_cols = [c for c in df.columns if c in selected]
+            result_cols = [c for c in df.columns if str(c) in selected]
         else:
-            result_cols = [c for c in df.columns if c not in selected]
+            result_cols = [c for c in df.columns if str(c) not in selected]
 
-        df = df.loc[:, result_cols]
-
-        return df
+        return df.loc[:, result_cols]
 
     def expand_name_ranges(self, spec: Optional[List[Name]]) -> List[str]:
         if not spec:
@@ -59,26 +69,21 @@ class DataFrameColumnFilterUC(DataUseCase):
         out: List[str] = []
         rx = re.compile(r"^([^\d]*)(\d+)$")
         for item in spec:
-            if isinstance(item, tuple) and len(item) == 2:
+            if isinstance(item, (tuple, list)) and len(item) == 2:
                 a, b = item
                 if not (isinstance(a, str) and isinstance(b, str)):
-                    raise ValueError("The name range must be strings, e.g. ('h5', 'h15').")
-
+                    raise ValueError("The name range must be strings, e.g. ['h5', 'h15'].")
                 m1, m2 = rx.match(a), rx.match(b)
                 if not (m1 and m2):
-                    raise ValueError(f"Expected a pair like ('h5', 'h15'); got: {item}")
-
+                    raise ValueError(f"Expected a pair like ['h5', 'h15']; got: {item}")
                 if m1.group(1) != m2.group(1):
                     raise ValueError(f"Prefixes must match: {a} vs {b}")
-
                 prefix = m1.group(1)
-                start, end = int(m1.group(2)), int(m2.group(2))
-                lo, hi = sorted((start, end))
+                lo, hi = sorted((int(m1.group(2)), int(m2.group(2))))
                 out.extend([f"{prefix}{i}" for i in range(lo, hi + 1)])
             else:
                 if not isinstance(item, str):
                     raise ValueError(f"Column name must be a string: {item!r}")
-
                 out.append(item)
         return out
 
@@ -89,10 +94,9 @@ class DataFrameColumnFilterUC(DataUseCase):
         for item in spec:
             if isinstance(item, int):
                 out.append(item)
-            elif isinstance(item, tuple) and len(item) == 2 and all(isinstance(x, int) for x in item):
+            elif isinstance(item, (tuple, list)) and len(item) == 2 and all(isinstance(x, int) for x in item):
                 lo, hi = sorted(item)
-                out.extend(list(range(lo, hi + 1)))
+                out.extend(range(lo, hi + 1))
             else:
                 raise ValueError(f"Unsupported index/range format: {item!r}")
-
         return out

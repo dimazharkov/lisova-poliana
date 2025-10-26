@@ -4,12 +4,7 @@ from src.infra.repositories.data_file_repository import DataFileRepository
 
 
 class PersonData(DataFileRepository):
-    def read(self):
-        if self.data is None:
-            raise ValueError("Данные не загружены. Проверь source_path.")
-        return self._prepare_data(self.data)
-
-    def _prepare_data(self, data: pd.DataFrame) -> pd.DataFrame:
+    def _prep_data(self, data: pd.DataFrame) -> pd.DataFrame:
         drop_cols = ["last_name", "first_name", "gender", "year_of_birth", "age", "complains"]
         metadata = data.drop(columns=drop_cols).copy()
 
