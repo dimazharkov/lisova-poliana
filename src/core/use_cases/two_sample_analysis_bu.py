@@ -19,9 +19,8 @@ class TwoSampleAnalysisUC(DataUseCase):
             stat_calculator: StatCalculatorContract,
             df_filter: DataFrameFilterContract,
             repository: ExperimentRepositoryContract,
+            hue_field: str,
             effect_field: str,
-            hue_field: Optional[str] = None,
-            hue_values: Optional[Sequence[Union[int, str]]] = (0, 1),
             stratify_fields: Optional[list[str]] = None,
             index_fields: Optional[list[str]] = None,
             experiment_config: Optional[dict] = None,
@@ -31,7 +30,6 @@ class TwoSampleAnalysisUC(DataUseCase):
         self.df_filter = df_filter
         self.repository = repository
         self.hue_field = hue_field
-        self.hue_values = list(hue_values) if hue_values is not None else None
         self.effect_field = effect_field
         self.stratify_fields = stratify_fields
         self.index_fields = index_fields
@@ -47,35 +45,21 @@ class TwoSampleAnalysisUC(DataUseCase):
         ...
 
     def run(self, data: DataLike) -> DataLike:
-        if isinstance(data, pd.DataFrame):
-            if not self.hue_field:
-                raise ValueError("For a single DataFrame, hue_field must be specified.")
-            if not self.hue_values or len(self.hue_values) != 2:
-                raise ValueError("For a single DataFrame, hue_values must contain exactly two values.")
-            hue_value0, hue_value1 = self.hue_values
-            df = self.df_filter.filter(data.copy())
-            df0 = df[df[self.hue_field] == hue_value0].copy()
-            df1 = df[df[self.hue_field] == hue_value1].copy()
-        elif (
-                isinstance(data, tuple)
-                and len(data) == 2
-                and all(isinstance(x, pd.DataFrame) for x in data)
-        ):
-            df0 = self.df_filter.filter(data[0].copy())
-            df1 = self.df_filter.filter(data[1].copy())
-        else:
-            raise ValueError("Data must be a pd.DataFrame or a tuple of two pd.DataFrame.")
+
+        df = self.df_filter.filter(
+            data.copy()
+        )
 
         result_data = {}
         result_figs = {}
 
-        stats, figs = self.run_aggregated(df0, df1)
+        stats, figs = self.run_aggregated(df)
         result_data.update(stats)
         result_figs.update(figs)
 
         if self.stratify_fields:
             for strat_field in self.stratify_fields:
-                stats, figs = self.run_stratified(df0, df1, strat_field)
+                stats, figs = self.run_stratified(df, strat_field)
                 result_data.update(stats)
                 result_figs.update(figs)
 
@@ -83,13 +67,13 @@ class TwoSampleAnalysisUC(DataUseCase):
 
         return data
 
-    def run_aggregated(self, df0: pd.DataFrame, df1: pd.DataFrame) -> tuple[dict, dict]:
+    def run_aggregated(self, data: pd.DataFrame) -> tuple[dict, dict]:
         key = "aggregated"
         stats, figures = {}, {}
         config = self.cfg.aggregated
 
-        g0 = self.prep_series(df0)
-        g1 = self.prep_series(df1)
+        g0 = self.prep_series(data, hue_value=0)
+        g1 = self.prep_series(data, hue_value=1)
 
         stats[key] = asdict(self.stat_calculator.calculate(
             g0, g1, method=self.test_method
@@ -120,21 +104,20 @@ class TwoSampleAnalysisUC(DataUseCase):
         figures[key] = fig
         return stats, figures
 
-    def run_stratified(self, df0: pd.DataFrame, df1: pd.DataFrame, strat_field: str) -> tuple[dict, dict]:
+    def run_stratified(self, data: pd.DataFrame, strat_field: str) -> tuple[dict, dict]:
         stats, figures = {}, {}
         config = self.cfg.stratified[strat_field]
 
-        strat_field_values = df0[strat_field].dropna().unique()
-
         # 1) Готовим данные для графика и сразу считаем статистику
         frames = []
-        for val in strat_field_values:
-            sub0 = df0[df0[strat_field] == val].copy()
-            g0 = self.prep_series(sub0)
+        for val in data[strat_field].dropna().unique():
+            subset = data[data[strat_field] == val]
 
-            sub1 = df1[df1[strat_field] == val].copy()
-            g1 = self.prep_series(sub1)
-
+            g0 = self.prep_series(subset, hue_value=0)
+            g1 = self.prep_series(subset, hue_value=1)
+            # if strat_field == "nsi_exceeded" and val == 0:
+            #     print("g0 = ", g0)
+            #     print("g1 = ", g1)
             # для статистики — используем ровно эти же серии
             stats[f"{strat_field}_{int(val)}"] = asdict(self.stat_calculator.calculate(
                 g0, g1, method=self.test_method
@@ -172,12 +155,12 @@ class TwoSampleAnalysisUC(DataUseCase):
 
         return stats, figures
 
-    def prep_series(self, data: pd.DataFrame) -> pd.Series:
+    def prep_series(self, data: pd.DataFrame, hue_value: int) -> pd.Series:
         """
         Возвращает Series значений effect_field,
         индексированных по index_fields (если заданы).
         """
-        df = data.copy()
+        df = data[data[self.hue_field].astype(int) == hue_value].copy()
         df = df.dropna(subset=[self.effect_field])
 
         if not self.index_fields:

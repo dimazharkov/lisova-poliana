@@ -17,3 +17,17 @@ def from_google_sheets(
         url=url,
         target_path=target_path
     )
+
+@app.command()
+def control_group(
+        url: str = typer.Option(
+            "https://docs.google.com/spreadsheets/d/1vxdtkTqkI9dlgB5HZ200ZPgu_ynxTIMHpMYGf_hCNBM", help=""
+        ),
+        target_path: str = typer.Option(
+            "source/control_group_data.json", help=""
+        )
+):
+    import_from_google_sheets(
+        url=url,
+        target_path=target_path
+    )
