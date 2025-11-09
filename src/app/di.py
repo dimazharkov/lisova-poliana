@@ -95,18 +95,3 @@ class AppContainer(Container):
         target_path=config.target_path,
         provider=config_provider
     )
-
-    check_control_group_uc = providers.Factory(
-        CheckControlGroupUC,
-        stat_calculator=chosen_stat_calculator,
-        df_filter=df_filter,
-        repository=experiment_repository,
-        hue_field=config.hue_field,
-        effect_field=config.effect_field,
-        stratify_fields=config.stratify_fields,
-        index_fields=config.index_fields,
-        experiment_config=config.experiment_config,
-        test_method=config.test_method
-    )
-
-

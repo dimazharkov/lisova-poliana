@@ -26,6 +26,7 @@ class PipelineValidator:
                 try:
                     valid_schema = uc_schema(**step.step_schema)
                 except ValidationError:
+                    print(step.step_schema)
                     errors.append(f"[{i}] use case {step.use_case} schema is invalid")
                     continue
             else:

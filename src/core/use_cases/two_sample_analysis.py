@@ -57,7 +57,7 @@ class TwoSampleAnalysisUC(DataUseCase):
             df0 = df[df[self.hue_field] == hue_value0].copy()
             df1 = df[df[self.hue_field] == hue_value1].copy()
         elif (
-                isinstance(data, tuple)
+                isinstance(data, list)
                 and len(data) == 2
                 and all(isinstance(x, pd.DataFrame) for x in data)
         ):
@@ -95,19 +95,21 @@ class TwoSampleAnalysisUC(DataUseCase):
             g0, g1, method=self.test_method
         ))
 
+        hue_field = "__hue"
+
         df_plot = (
             pd.concat([
-                g0.to_frame(name=self.effect_field).assign(**{self.hue_field: 0}),
-                g1.to_frame(name=self.effect_field).assign(**{self.hue_field: 1})
+                g0.to_frame(name=self.effect_field).assign(**{hue_field: 0}),
+                g1.to_frame(name=self.effect_field).assign(**{hue_field: 1})
             ])
         )
 
         fig = plt.figure(figsize=(6, 4))
         sns.boxplot(
             data=df_plot,
-            x=self.hue_field,
+            x=hue_field,
             y=self.effect_field,
-            hue=self.hue_field,
+            hue=hue_field,
             palette="Set2",
             showfliers=False,
             width=0.2
@@ -116,6 +118,12 @@ class TwoSampleAnalysisUC(DataUseCase):
         plt.xlabel("")
         plt.ylabel(config.ylabel)
         plt.xticks([0, 1], config.xticks)
+        if "labels" in config:
+            legend = plt.legend()
+            legend.get_texts()[0].set_text(config.labels.before)
+            legend.get_texts()[1].set_text(config.labels.after)
+        else:
+            plt.legend().set_visible(False)
         plt.tight_layout()
         figures[key] = fig
         return stats, figures
@@ -140,9 +148,11 @@ class TwoSampleAnalysisUC(DataUseCase):
                 g0, g1, method=self.test_method
             ))
 
+            hue_field = "__hue"
+
             # для графика — собираем cleaned long-данные
-            f0 = g0.to_frame(name=self.effect_field).assign(**{self.hue_field: 0, strat_field: val})
-            f1 = g1.to_frame(name=self.effect_field).assign(**{self.hue_field: 1, strat_field: val})
+            f0 = g0.to_frame(name=self.effect_field).assign(**{hue_field: 0, strat_field: val})
+            f1 = g1.to_frame(name=self.effect_field).assign(**{hue_field: 1, strat_field: val})
             frames.extend([f0, f1])
 
         df_plot = pd.concat(frames, ignore_index=True)
@@ -155,7 +165,7 @@ class TwoSampleAnalysisUC(DataUseCase):
             data=df_plot,
             x=strat_field,
             y=self.effect_field,
-            hue=self.hue_field,
+            hue=hue_field,
             palette="Set2",
             showfliers=False,
             width=0.2
@@ -164,9 +174,15 @@ class TwoSampleAnalysisUC(DataUseCase):
         plt.xlabel("")
         plt.ylabel(config.ylabel)
         plt.xticks([0, 1], config.xticks)
-        legend = plt.legend()
-        legend.get_texts()[0].set_text(config.labels.before)
-        legend.get_texts()[1].set_text(config.labels.after)
+        if "labels" in config:
+            legend = plt.legend()
+            legend.get_texts()[0].set_text(config.labels.before)
+            legend.get_texts()[1].set_text(config.labels.after)
+        else:
+            plt.legend().set_visible(False)
+        # legend = plt.legend()
+        # legend.get_texts()[0].set_text(config.labels.before)
+        # legend.get_texts()[1].set_text(config.labels.after)
         plt.tight_layout()
         figures[strat_field] = fig
 
